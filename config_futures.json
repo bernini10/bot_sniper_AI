@@ -1,0 +1,14 @@
+{
+    "exchange": "bybit",
+    "timeframes": ["15m", "30m", "1h"],
+    "leverage": 10,
+    "max_slots_watchlist": 5,
+    "pairs": [
+        "BTC/USDT", "ETH/USDT", "SOL/USDT", "XRP/USDT", "DOGE/USDT",
+        "ADA/USDT", "AVAX/USDT", "LINK/USDT", "DOT/USDT", "POL/USDT",
+        "LTC/USDT", "BCH/USDT", "UNI/USDT", "TRX/USDT", "ETC/USDT",
+        "FIL/USDT", "ATOM/USDT", "XLM/USDT", "NEAR/USDT", "APT/USDT",
+        "ARB/USDT", "OP/USDT", "LDO/USDT", "HBAR/USDT", "VET/USDT",
+        "QNT/USDT", "GRT/USDT", "AAVE/USDT", "EGLD/USDT", "SAND/USDT"
+    ]
+}

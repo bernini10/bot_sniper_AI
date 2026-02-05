@@ -1,0 +1,6 @@
+__pycache__/
+*.log
+.env
+segredos.json
+trades_history.json
+watchlist.json
