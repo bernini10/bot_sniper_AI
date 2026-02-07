@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger("ExecutorBybit")
 
 # --- CONFIGURAÇÃO DE RISCO (FASE 3) ---
-RISK_PER_TRADE = 0.015  # Arrisca 1.5% da banca por trade
+RISK_PER_TRADE = 0.05  # Arrisca 5% da banca por trade
 MAX_LEVERAGE = 10       # Alavancagem máxima permitida
 
 class ExecutorBybit:
@@ -142,8 +142,28 @@ class ExecutorBybit:
                 sys.exit(1)
 
             market = self.exchange.market(self.target_symbol_final)
+            
+            # Garantir que precision seja inteiro
             amount_precision = market.get('precision', {}).get('amount', 3)
+            if isinstance(amount_precision, float):
+                # Converter precisão float (0.001) para casas decimais (3)
+                import math
+                amount_precision = abs(int(math.log10(amount_precision)))
+            amount_precision = int(amount_precision)
+            
+            # Consultar mínimo exigido pela corretora
+            min_amount = market.get('limits', {}).get('amount', {}).get('min', 0)
+            
+            # Arredondar quantidade
             amount_coins = round(amount_coins, amount_precision)
+            
+            # Se quantidade arredondada for menor que o mínimo, arredondar para cima
+            if min_amount and amount_coins < min_amount:
+                # Calcular próximo valor válido acima do mínimo
+                import math
+                step = 10 ** (-amount_precision)
+                amount_coins = math.ceil(min_amount / step) * step
+                logger.warning(f"⚠️ Quantidade ajustada para mínimo da corretora: {amount_coins:.{amount_precision}f}")
             
             side = 'sell' if self.alvo_dados['direcao'] == 'SHORT' else 'buy'
             
