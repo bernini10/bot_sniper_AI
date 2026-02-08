@@ -240,7 +240,7 @@ def limpar_watchlist(message):
     if str(message.chat.id) != str(CHAT_ID): return
     try:
         with open(WATCHLIST_FILE, 'w') as f:
-            json.dump({"slots_ocupados": 0, "max_slots": 5, "pares": []}, f)
+            json.dump({"slots_ocupados": 0, "max_slots": 10, "pares": []}, f)
         bot.reply_to(message, "🗑️ Watchlist limpa!", parse_mode='Markdown')
     except Exception as e:
         bot.reply_to(message, f"Erro: {e}")

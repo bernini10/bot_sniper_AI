@@ -7,6 +7,7 @@ import argparse
 import logging
 from datetime import datetime
 from lib_utils import JsonManager
+from post_entry_validator import PostEntryValidator
 
 # Configuração de Logs
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -178,6 +179,22 @@ class ExecutorBybit:
             self.registrar_entrada(price, amount_coins, usdt_total * RISK_PER_TRADE)
             self.remover_da_watchlist("Trade Executado")
             
+            # === SEVERINO: Criar validador pós-entrada ===
+            self.post_validator = PostEntryValidator(
+                exchange=self.exchange,
+                symbol=self.target_symbol_final,
+                entry_price=price,
+                side=side,
+                pattern_data={
+                    'pattern_name': self.alvo_dados.get('padrao', 'Unknown'),
+                    'direction': self.alvo_dados.get('direcao', '').lower(),
+                    'neckline': self.alvo_dados.get('neckline'),
+                    'target': self.alvo_dados.get('target'),
+                    'stop_loss': self.alvo_dados.get('stop_loss')
+                }
+            )
+            logger.info(f"🔍 Validação pós-entrada ATIVADA para {self.symbol}")
+            
             return order, side, price
             
         except Exception as e:
@@ -223,7 +240,44 @@ class ExecutorBybit:
         
         while True:
             try:
-                time.sleep(15)
+                time.sleep(30)
+                
+                # === SEVERINO: VALIDAÇÃO PÓS-ENTRADA (CRÍTICO) ===
+                if hasattr(self, 'post_validator'):
+                    should_exit, reason = self.post_validator.should_exit()
+                    if should_exit:
+                        logger.warning(f"⚠️ INVALIDAÇÃO DETECTADA: {reason}")
+                        logger.info(f"🚪 Fechando posição IMEDIATAMENTE (antes do SL)")
+                        
+                        try:
+                            # Busca posição atual
+                            positions = self.exchange.fetch_positions([self.target_symbol_final])
+                            open_pos = [p for p in positions if float(p['contracts']) > 0]
+                            
+                            if open_pos:
+                                pos = open_pos[0]
+                                amount = abs(float(pos['contracts']))
+                                close_side = 'sell' if side == 'buy' else 'buy'
+                                
+                                # Fecha posição a mercado
+                                close_order = self.exchange.create_order(
+                                    self.target_symbol_final,
+                                    'market',
+                                    close_side,
+                                    amount,
+                                    params={'reduceOnly': True}
+                                )
+                                
+                                logger.info(f"✅ Posição fechada por invalidação: {close_order['id']}")
+                                logger.info(f"📊 Motivo: {reason}")
+                                break
+                            else:
+                                logger.info("Posição já estava fechada")
+                                break
+                                
+                        except Exception as e:
+                            logger.error(f"❌ Erro ao fechar posição invalidada: {e}")
+                            # Continua loop para tentar novamente
                 
                 # Verifica se posição ainda existe
                 positions = self.exchange.fetch_positions([self.target_symbol_final])
@@ -247,18 +301,76 @@ class ExecutorBybit:
                         # Atualiza SL na Bybit
                         new_sl = entry_price * 1.002 if side == 'buy' else entry_price * 0.998 # Pequeno lucro para cobrir taxas
                         
+                        # === CAMADA 1: AJUSTAR STOP LOSS EXISTENTE ===
                         try:
-                            # Bybit V5: set_trading_stop
-                            self.exchange.set_trading_stop(
-                                symbol=self.target_symbol_final,
-                                side=side,
-                                stop_loss=new_sl,
-                                params={'positionIdx': 0} # 0 para One-Way Mode
-                            )
-                            be_acionado = True
-                            logger.info("✅ Break-Even Configurado!")
-                        except Exception as e:
-                            logger.error(f"Falha ao mover BE: {e}")
+                            logger.info("🔧 [CAMADA 1] Tentando ajustar SL via privatePostV5PositionTradingStop...")
+                            
+                            # Método correto para Bybit V5 via ccxt
+                            response = self.exchange.privatePostV5PositionTradingStop({
+                                'category': 'linear',
+                                'symbol': self.target_symbol_final.replace('/', '').replace(':USDT', 'USDT'),
+                                'stopLoss': str(new_sl),
+                                'positionIdx': 0  # One-Way Mode
+                            })
+                            
+                            # Verificar se funcionou
+                            time.sleep(2)  # Aguarda API processar
+                            positions_check = self.exchange.fetch_positions([self.target_symbol_final])
+                            pos_check = [p for p in positions_check if float(p['contracts']) > 0]
+                            
+                            if pos_check:
+                                current_sl = float(pos_check[0].get('stopLoss') or 0)
+                                if abs(current_sl - new_sl) < (new_sl * 0.01):  # Tolerância de 1%
+                                    be_acionado = True
+                                    logger.info(f"✅ [CAMADA 1] Break-Even configurado com sucesso! SL ajustado para {new_sl:.4f}")
+                                else:
+                                    raise Exception(f"SL não foi atualizado corretamente. Esperado: {new_sl:.4f}, Atual: {current_sl:.4f}")
+                            else:
+                                raise Exception("Posição não encontrada após ajuste")
+                                
+                        except Exception as e1:
+                            logger.error(f"❌ [CAMADA 1] Falha ao ajustar SL: {e1}")
+                            
+                            # === CAMADA 2: CANCELAR E RECRIAR STOP LOSS ===
+                            try:
+                                logger.info("🔄 [CAMADA 2] Tentando cancelar SL antigo e criar novo...")
+                                
+                                # Buscar ordens abertas de Stop Loss
+                                open_orders = self.exchange.fetch_open_orders(self.target_symbol_final)
+                                stop_orders = [o for o in open_orders if o['type'] in ['stop', 'stop_market', 'Stop']]
+                                
+                                # Cancelar SL antigo
+                                for order in stop_orders:
+                                    try:
+                                        self.exchange.cancel_order(order['id'], self.target_symbol_final)
+                                        logger.info(f"🗑️ SL antigo cancelado: {order['id']}")
+                                    except Exception as e_cancel:
+                                        logger.warning(f"Aviso ao cancelar ordem {order['id']}: {e_cancel}")
+                                
+                                time.sleep(1)
+                                
+                                # Criar novo Stop Loss
+                                sl_side = 'sell' if side == 'buy' else 'buy'  # Oposto da posição
+                                position_size = float(pos['contracts'])
+                                
+                                new_sl_order = self.exchange.create_order(
+                                    symbol=self.target_symbol_final,
+                                    type='stop_market',
+                                    side=sl_side,
+                                    amount=position_size,
+                                    params={
+                                        'stopLoss': str(new_sl),
+                                        'reduceOnly': True,
+                                        'positionIdx': 0
+                                    }
+                                )
+                                
+                                be_acionado = True
+                                logger.info(f"✅ [CAMADA 2] Break-Even configurado via nova ordem! SL: {new_sl:.4f}, Ordem: {new_sl_order['id']}")
+                                
+                            except Exception as e2:
+                                logger.error(f"❌ [CAMADA 2] FALHA CRÍTICA ao recriar SL: {e2}")
+                                logger.error("⚠️ POSIÇÃO SEM PROTEÇÃO DE BREAK-EVEN! Monitorar manualmente.")
 
                 # --- LOGICA TRAILING (Opcional Futuro: Mover SL a cada X%) ---
                 # Por enquanto, BE é a prioridade da Fase 4.

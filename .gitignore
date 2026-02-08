@@ -4,3 +4,24 @@ __pycache__/
 segredos.json
 trades_history.json
 watchlist.json
+
+# Backups
+*.backup
+*.backup_*
+*.old
+*.patch
+
+# Dados temporários
+btcd_data.json
+mock_history.json
+
+# Scripts de análise temporários
+analisador_erros.py
+analise_erros_24h.py
+generate_mock_history.py
+test_api.py
+
+# Templates antigos
+templates/dashboard.html
+templates/dashboard.html.backup*
+templates/index.html.backup*

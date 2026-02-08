@@ -184,7 +184,7 @@ def monitorar_watchlist():
             if restart_loop:
                 continue
 
-            time.sleep(10) # Verifica preços a cada 10s (High Frequency Check)
+            time.sleep(20) # Verifica preços a cada 10s (High Frequency Check)
 
         except KeyboardInterrupt:
             break

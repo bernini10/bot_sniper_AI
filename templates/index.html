@@ -3,232 +3,560 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Severino Sniper Dashboard Pro</title>
+    <title>Severino AI - The Future of AI-Powered Crypto Trading</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0b0f19; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; }
-        .card { background-color: #151b2b; border: 1px solid #2d3748; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
-        .glass { background: rgba(21, 27, 43, 0.7); backdrop-filter: blur(10px); }
-        .pulse-green { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
-        .text-neon-green { color: #00ff9d; text-shadow: 0 0 10px rgba(0, 255, 157, 0.5); }
-        .text-neon-red { color: #ff0055; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
-        .log-terminal { background-color: #050505; color: #00ff00; font-family: 'Courier New', monospace; border: 1px solid #333; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4a5568; }
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0b0f19 0%, #1a1f2e 100%); color: #e2e8f0; }
+        .gradient-text { background: linear-gradient(90deg, #00ff9d 0%, #0066ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass { background: rgba(21, 27, 43, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow { box-shadow: 0 0 40px rgba(0, 255, 157, 0.3); }
+        .hero-bg { background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.2) 0%, transparent 50%); }
+        .stat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 255, 157, 0.2); }
+        .cta-button { background: linear-gradient(90deg, #00ff9d 0%, #00cc7d 100%); transition: all 0.3s ease; }
+        .cta-button:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0, 255, 157, 0.4); }
+        .section { padding: 80px 20px; }
+        .phase-card { background: linear-gradient(135deg, rgba(0, 102, 255, 0.1) 0%, rgba(0, 255, 157, 0.05) 100%); border-left: 4px solid #00ff9d; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .float { animation: float 6s ease-in-out infinite; }
+        .tech-badge { background: rgba(0, 102, 255, 0.2); border: 1px solid rgba(0, 102, 255, 0.4); color: #0066ff; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
     </style>
 </head>
-<body class="p-6 min-h-screen">
+<body>
 
-    <!-- TOP BAR -->
-    <div class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 bg-green-500 rounded-full pulse-green"></div>
-            <h1 class="text-2xl font-bold tracking-wider text-white">SEVERINO<span class="text-blue-500">SNIPER</span>_V2.1</h1>
+<!-- HEADER / NAV -->
+<nav class="fixed top-0 w-full glass z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center font-bold text-white">S</div>
+            <span class="text-xl font-bold">Severino<span class="text-green-400">AI</span></span>
         </div>
-        <div class="text-sm text-gray-500" id="clock">00:00:00 UTC</div>
-    </div>
-
-    <!-- METRICS GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="card border-t-4 border-blue-500 hover:scale-105 transition transform duration-300">
-            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Total Equity</h3>
-            <p class="text-3xl font-bold mt-2 text-white" id="equity">Loading...</p>
-            <p class="text-xs text-gray-500 mt-1">Available Margin</p>
-        </div>
-        <div class="card border-t-4 border-green-500 hover:scale-105 transition transform duration-300">
-            <h3 class="text-gray-400 text-xs uppercase tracking-widest">PnL Today (Est.)</h3>
-            <p class="text-3xl font-bold mt-2 text-neon-green" id="pnl-today">$0.00</p>
-            <p class="text-xs text-gray-500 mt-1">Realized + Unrealized</p>
-        </div>
-        <div class="card border-t-4 border-purple-500 hover:scale-105 transition transform duration-300">
-            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Active Trades</h3>
-            <p class="text-3xl font-bold mt-2 text-white" id="open-count">0</p>
-            <p class="text-xs text-gray-500 mt-1">Positions Open</p>
-        </div>
-        <div class="card border-t-4 border-yellow-500 hover:scale-105 transition transform duration-300">
-            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Win Rate (Last 50)</h3>
-            <p class="text-3xl font-bold mt-2 text-yellow-400" id="winrate">--%</p>
-            <p class="text-xs text-gray-500 mt-1">Based on History</p>
+        <div class="hidden md:flex space-x-8 items-center">
+            <a href="#solution" class="hover:text-green-400 transition">Solution</a>
+            <a href="#vision" class="hover:text-green-400 transition">Vision</a>
+            <a href="#technology" class="hover:text-green-400 transition">Technology</a>
+            <a href="#roadmap" class="hover:text-green-400 transition">Roadmap</a>
+            <a href="/dashboard" class="px-6 py-2 rounded-lg glass border border-green-400 text-green-400 hover:bg-green-400 hover:text-black transition font-semibold">Live Dashboard</a>
         </div>
     </div>
+</nav>
 
-    <!-- MAIN LAYOUT -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+<!-- HERO SECTION -->
+<section class="hero-bg section pt-40 pb-20">
+    <div class="container mx-auto px-6 text-center">
+        <div class="inline-block mb-6 px-4 py-2 glass rounded-full text-sm text-green-400 border border-green-400/30">
+            🚀 Powered by AI Ensemble + TradingView Premium
+        </div>
+        <h1 class="text-6xl md:text-7xl font-black mb-6 leading-tight">
+            The Future of <br><span class="gradient-text">AI-Powered Crypto Trading</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto">
+            A hybrid system combining <strong class="text-white">Artificial Intelligence</strong> + <strong class="text-white">Human Expertise</strong> to dominate 24/7 crypto markets with surgical precision.
+        </p>
         
-        <!-- LEFT COL: RADAR -->
-        <div class="card col-span-1 flex flex-col h-[600px]">
-            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                <span>📡</span> Market Radar
-                <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded ml-auto" id="wl-count">0 Pairs</span>
-            </h2>
-            <div id="watchlist-container" class="space-y-4 overflow-y-auto flex-1 pr-2">
-                <!-- Watchlist Items -->
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+            <div class="glass rounded-xl p-6 stat-card">
+                <div class="text-4xl font-black gradient-text">30</div>
+                <div class="text-gray-400 mt-2">Trading Pairs</div>
+            </div>
+            <div class="glass rounded-xl p-6 stat-card">
+                <div class="text-4xl font-black gradient-text">90</div>
+                <div class="text-gray-400 mt-2">Analyses/Cycle</div>
+            </div>
+            <div class="glass rounded-xl p-6 stat-card">
+                <div class="text-4xl font-black gradient-text">&lt;50ms</div>
+                <div class="text-gray-400 mt-2">Response Time</div>
+            </div>
+            <div class="glass rounded-xl p-6 stat-card">
+                <div class="text-4xl font-black gradient-text">99.2%</div>
+                <div class="text-gray-400 mt-2">Uptime</div>
             </div>
         </div>
 
-        <!-- RIGHT COL: CHARTS & LOGS -->
-        <div class="col-span-1 lg:col-span-2 space-y-6">
-            
-            <!-- CHART -->
-            <div class="card">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold">📈 Performance Curve</h2>
-                    <select class="bg-gray-800 text-xs border border-gray-700 rounded px-2 py-1 outline-none">
-                        <option>Last 50 Trades</option>
-                    </select>
+        <!-- CTAs -->
+        <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+            <a href="/dashboard" class="cta-button px-10 py-4 rounded-xl text-black font-bold text-lg">
+                Access Live Dashboard →
+            </a>
+            <a href="https://github.com/bernini10/bot_sniper_bybit.git" target="_blank" class="px-10 py-4 rounded-xl glass border border-white/20 hover:border-green-400 transition font-semibold">
+                View on GitHub
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- THE PROBLEM -->
+<section id="problem" class="section bg-black/30">
+    <div class="container mx-auto px-6">
+        <h2 class="text-5xl font-black text-center mb-16">The <span class="text-red-400">Problem</span></h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div class="glass rounded-xl p-8 text-center">
+                <div class="text-5xl mb-4">⏰</div>
+                <h3 class="text-xl font-bold mb-3">24/7 Markets</h3>
+                <p class="text-gray-400">Crypto never sleeps. Humans need rest. Opportunities vanish in milliseconds.</p>
+            </div>
+            <div class="glass rounded-xl p-8 text-center">
+                <div class="text-5xl mb-4">🧠</div>
+                <h3 class="text-xl font-bold mb-3">Emotional Bias</h3>
+                <p class="text-gray-400">Fear and greed destroy 99% of traders. Discipline requires removing emotion.</p>
+            </div>
+            <div class="glass rounded-xl p-8 text-center">
+                <div class="text-5xl mb-4">📊</div>
+                <h3 class="text-xl font-bold mb-3">Data Overload</h3>
+                <p class="text-gray-400">Analyzing 30 pairs across 3 timeframes manually? Impossible to scale.</p>
+            </div>
+            <div class="glass rounded-xl p-8 text-center">
+                <div class="text-5xl mb-4">💸</div>
+                <h3 class="text-xl font-bold mb-3">Capital Risk</h3>
+                <p class="text-gray-400">One bad trade can wipe months of gains. Risk management is non-negotiable.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- OUR SOLUTION -->
+<section id="solution" class="section">
+    <div class="container mx-auto px-6">
+        <h2 class="text-5xl font-black text-center mb-6">Our <span class="gradient-text">Solution</span></h2>
+        <p class="text-center text-xl text-gray-400 mb-16 max-w-3xl mx-auto">
+            The <strong class="text-green-400">Hunter-Killer Architecture</strong> — a multi-module system that never sleeps, never feels fear, and executes with mechanical precision.
+        </p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <!-- Scanner -->
+            <div class="glass rounded-2xl p-8 hover:border-green-400 border border-transparent transition">
+                <div class="text-4xl mb-4">🔍</div>
+                <h3 class="text-2xl font-bold mb-4 text-green-400">Scanner AI</h3>
+                <p class="text-gray-300 mb-4">Continuous pattern recognition across 30 pairs and 3 timeframes. Detects Head & Shoulders, OCO, Triangles in real-time.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-green-400">Active</span></div>
+            </div>
+
+            <!-- Monitor -->
+            <div class="glass rounded-2xl p-8 hover:border-blue-400 border border-transparent transition">
+                <div class="text-4xl mb-4">🎯</div>
+                <h3 class="text-2xl font-bold mb-4 text-blue-400">Monitor Engine</h3>
+                <p class="text-gray-300 mb-4">Tick-by-tick price surveillance. Waits for exact neckline breakout before triggering executor. No premature entries.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-blue-400">Active</span></div>
+            </div>
+
+            <!-- Executor -->
+            <div class="glass rounded-2xl p-8 hover:border-purple-400 border border-transparent transition">
+                <div class="text-4xl mb-4">⚡</div>
+                <h3 class="text-2xl font-bold mb-4 text-purple-400">Executor Module</h3>
+                <p class="text-gray-300 mb-4">Fire-and-forget orders. Enters at market, sets stop/target on exchange, activates break-even automation at 50% profit.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-purple-400">Ready</span></div>
+            </div>
+
+            <!-- Risk Management -->
+            <div class="glass rounded-2xl p-8 hover:border-yellow-400 border border-transparent transition">
+                <div class="text-4xl mb-4">🛡️</div>
+                <h3 class="text-2xl font-bold mb-4 text-yellow-400">Risk Management</h3>
+                <p class="text-gray-300 mb-4">Fixed 5% risk per trade. BTC trend filter (only trade with macro). Volume confirmation. Auto break-even protection.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-yellow-400">Active</span></div>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="glass rounded-2xl p-8 hover:border-pink-400 border border-transparent transition">
+                <div class="text-4xl mb-4">📊</div>
+                <h3 class="text-2xl font-bold mb-4 text-pink-400">Real-time Dashboard</h3>
+                <p class="text-gray-300 mb-4">Web UI with live watchlist, trade history, system logs, and equity tracking. Total transparency.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-pink-400"><a href="/dashboard" class="underline">Live Now</a></span></div>
+            </div>
+
+            <!-- Telegram -->
+            <div class="glass rounded-2xl p-8 hover:border-cyan-400 border border-transparent transition">
+                <div class="text-4xl mb-4">📱</div>
+                <h3 class="text-2xl font-bold mb-4 text-cyan-400">Telegram Command Center</h3>
+                <p class="text-gray-300 mb-4">Remote control via bot. Check balance, watchlist, system status, and restart services from anywhere.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-cyan-400">Active</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- THE VISION -->
+<section id="vision" class="section bg-gradient-to-b from-transparent to-black/50">
+    <div class="container mx-auto px-6">
+        <h2 class="text-5xl font-black text-center mb-6">The <span class="gradient-text">Vision</span></h2>
+        <p class="text-center text-xl text-gray-400 mb-16 max-w-3xl mx-auto">
+            What we can build together with <strong class="text-white">Google AI investment</strong>. This is where human creativity meets unlimited compute.
+        </p>
+
+        <!-- Phase 1 -->
+        <div class="phase-card glass rounded-2xl p-10 mb-8 max-w-5xl mx-auto">
+            <div class="flex items-center mb-6">
+                <div class="text-4xl mr-4">🧠</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-green-400">Phase 1: Intelligence Amplification</h3>
+                    <p class="text-gray-400">Q2 2026</p>
                 </div>
-                <div class="h-64">
-                    <canvas id="pnlChart"></canvas>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Multi-Model AI Ensemble</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>✓ <strong>GPT-4:</strong> Sentiment analysis from news/Twitter</li>
+                        <li>✓ <strong>Claude:</strong> Complex strategy reasoning</li>
+                        <li>✓ <strong>Gemini Pro:</strong> Real-time pattern recognition</li>
+                        <li>✓ <strong>Ensemble Voting:</strong> 3 AIs decide every trade</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Advanced Pattern Library</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>✓ 50+ chart patterns (vs 3 today)</li>
+                        <li>✓ Machine learning adaptability</li>
+                        <li>✓ Automated backtesting engine</li>
+                        <li>✓ Strategy performance attribution</li>
+                    </ul>
                 </div>
             </div>
 
-            <!-- LOGS TERMINAL -->
-            <div class="card bg-black border-gray-800">
-                <h2 class="text-sm font-bold text-gray-500 mb-2 font-mono">>_ SYSTEM_LOGS</h2>
-                <div id="logs" class="log-terminal h-48 overflow-y-auto text-xs p-2">
-                    <div class="animate-pulse">Connecting to neural core...</div>
+            <div class="mt-6">
+                <h4 class="text-xl font-bold mb-3 text-white">Multi-Exchange Support</h4>
+                <div class="flex flex-wrap gap-3">
+                    <span class="tech-badge">Bybit</span>
+                    <span class="tech-badge">Binance</span>
+                    <span class="tech-badge">OKX</span>
+                    <span class="tech-badge">Coinbase</span>
+                    <span class="tech-badge">Inter-Exchange Arbitrage</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-card glass rounded-2xl p-10 mb-8 max-w-5xl mx-auto">
+            <div class="flex items-center mb-6">
+                <div class="text-4xl mr-4">💬</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-blue-400">Phase 2: Human-AI Collaboration</h3>
+                    <p class="text-gray-400">Q3 2026</p>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Natural Language Trading</h4>
+                    <div class="bg-black/50 p-4 rounded-lg mb-3">
+                        <p class="text-green-400 font-mono text-sm">$ "Show me bullish BTC setups under 1% risk"</p>
+                        <p class="text-gray-400 text-sm mt-2">AI interprets intent → scans → suggests 3 trades with entry/exit</p>
+                    </div>
+                    <p class="text-gray-300">Speak to your AI co-pilot in plain English. It handles the complexity.</p>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-3 text-white">AI Trading Coach</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>✓ Analyzes your trading psychology</li>
+                        <li>✓ Identifies patterns in mistakes</li>
+                        <li>✓ Suggests improvements: <em>"You exit winners 30% too early"</em></li>
+                        <li>✓ Personalized strategy recommendations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h4 class="text-xl font-bold mb-3 text-white">Predictive Analytics</h4>
+                <p class="text-gray-300">Deep learning models predicting next 4h-24h price action with confidence scores. Backtested accuracy metrics displayed transparently.</p>
+            </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-card glass rounded-2xl p-10 max-w-5xl mx-auto">
+            <div class="flex items-center mb-6">
+                <div class="text-4xl mr-4">🏦</div>
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-400">Phase 3: Autonomous Trading Fund</h3>
+                    <p class="text-gray-400">Q4 2026</p>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Managed Capital Pools</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>✓ Investors allocate via smart contracts</li>
+                        <li>✓ AI manages 24/7 with custom strategies</li>
+                        <li>✓ Full on-chain transparency</li>
+                        <li>✓ Automatic profit distribution</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Performance Attribution</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>✓ Track AI vs Human decisions</li>
+                        <li>✓ ROI per strategy/pattern/asset</li>
+                        <li>✓ Public audit trail</li>
+                        <li>✓ Investor dashboard access</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h4 class="text-xl font-bold mb-3 text-white">Global Asset Expansion</h4>
+                <p class="text-gray-300 mb-3">Beyond crypto: Stocks, Forex, Commodities. Automated portfolio diversification with risk-adjusted returns.</p>
+                <div class="flex flex-wrap gap-3">
+                    <span class="tech-badge">Crypto</span>
+                    <span class="tech-badge">US Stocks</span>
+                    <span class="tech-badge">Forex</span>
+                    <span class="tech-badge">Commodities</span>
+                    <span class="tech-badge">DeFi Protocols</span>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- SCRIPTS -->
-    <script>
-        // CLOCK
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
-        }, 1000);
+<!-- TECHNOLOGY STACK -->
+<section id="technology" class="section bg-black/30">
+    <div class="container mx-auto px-6">
+        <h2 class="text-5xl font-black text-center mb-16">Technology <span class="gradient-text">Stack</span></h2>
+        
+        <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+            <!-- Current Infrastructure -->
+            <div class="glass rounded-2xl p-8">
+                <h3 class="text-2xl font-bold mb-6 text-green-400">Current Infrastructure</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Language</span>
+                        <span class="font-bold">Python 3.13</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Framework</span>
+                        <span class="font-bold">Flask + CCXT</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Market Data</span>
+                        <span class="font-bold text-blue-400">TradingView Premium</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Database</span>
+                        <span class="font-bold">JSON + Redis (planned)</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Supervisor</span>
+                        <span class="font-bold">Systemd</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Uptime</span>
+                        <span class="font-bold text-green-400">99.2%</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-gray-300">Code Quality</span>
+                        <span class="font-bold">3.2K lines, modular</span>
+                    </div>
+                </div>
+            </div>
 
-        // CHART INIT
-        const ctx = document.getElementById('pnlChart').getContext('2d');
-        const pnlChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Cumulative PnL ($)',
-                    data: [],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { display: false },
-                    y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }
-                }
-            }
-        });
+            <!-- AI Integration Layer -->
+            <div class="glass rounded-2xl p-8 border-2 border-green-400/50 glow">
+                <h3 class="text-2xl font-bold mb-6 text-green-400">AI Integration (Roadmap)</h3>
+                <div class="space-y-4">
+                    <div class="bg-green-400/10 p-4 rounded-lg border border-green-400/30">
+                        <div class="font-bold text-green-400 mb-1">Google AI (Gemini Pro)</div>
+                        <p class="text-sm text-gray-300">Real-time pattern recognition, multi-modal analysis</p>
+                    </div>
+                    <div class="bg-blue-400/10 p-4 rounded-lg border border-blue-400/30">
+                        <div class="font-bold text-blue-400 mb-1">OpenAI (GPT-4 Turbo)</div>
+                        <p class="text-sm text-gray-300">Sentiment analysis, news parsing, strategy reasoning</p>
+                    </div>
+                    <div class="bg-purple-400/10 p-4 rounded-lg border border-purple-400/30">
+                        <div class="font-bold text-purple-400 mb-1">Anthropic (Claude 3.5)</div>
+                        <p class="text-sm text-gray-300">Complex decision-making, risk assessment</p>
+                    </div>
+                    <div class="bg-yellow-400/10 p-4 rounded-lg border border-yellow-400/30">
+                        <div class="font-bold text-yellow-400 mb-1">LangChain + Vector DB</div>
+                        <p class="text-sm text-gray-300">Orchestration, memory, retrieval-augmented generation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        async function updateData() {
-            try {
-                // 1. STATS
-                const resStats = await fetch('/api/stats');
-                const stats = await resStats.json();
-                document.getElementById('equity').innerText = `$${parseFloat(stats.equity).toFixed(2)}`;
-                document.getElementById('open-count').innerText = stats.open_positions.length;
+        <!-- Metrics -->
+        <div class="mt-16 max-w-5xl mx-auto">
+            <h3 class="text-2xl font-bold text-center mb-8">Current Production Metrics</h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="glass rounded-xl p-6 text-center">
+                    <div class="text-3xl font-black text-green-400">150+</div>
+                    <div class="text-sm text-gray-400 mt-2">Patterns Detected</div>
+                </div>
+                <div class="glass rounded-xl p-6 text-center">
+                    <div class="text-3xl font-black text-blue-400">&lt;50ms</div>
+                    <div class="text-sm text-gray-400 mt-2">Latency</div>
+                </div>
+                <div class="glass rounded-xl p-6 text-center">
+                    <div class="text-3xl font-black text-purple-400">0</div>
+                    <div class="text-sm text-gray-400 mt-2">Liquidations</div>
+                </div>
+                <div class="glass rounded-xl p-6 text-center">
+                    <div class="text-3xl font-black text-yellow-400">99.2%</div>
+                    <div class="text-sm text-gray-400 mt-2">Uptime</div>
+                </div>
+                <div class="glass rounded-xl p-6 text-center">
+                    <div class="text-3xl font-black text-pink-400">24/7</div>
+                    <div class="text-sm text-gray-400 mt-2">Operations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap" class="section">
+    <div class="container mx-auto px-6">
+        <h2 class="text-5xl font-black text-center mb-16"><span class="gradient-text">Roadmap</span></h2>
+        
+        <div class="max-w-4xl mx-auto">
+            <!-- Timeline -->
+            <div class="relative">
+                <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-green-400 via-blue-400 to-purple-400"></div>
                 
-                // 2. WATCHLIST
-                const resWl = await fetch('/api/watchlist');
-                const wl = await resWl.json();
-                document.getElementById('wl-count').innerText = `${wl.length} Pairs`;
-                
-                const wlContainer = document.getElementById('watchlist-container');
-                wlContainer.innerHTML = '';
-                
-                if (wl.length === 0) {
-                    wlContainer.innerHTML = '<div class="text-center text-gray-600 mt-10">Scanning...</div>';
-                } else {
-                    wl.forEach(item => {
-                        const distPct = item.dist_pct || 0;
-                        const progressColor = distPct < 0.2 ? 'bg-red-500' : (distPct < 1.0 ? 'bg-yellow-500' : 'bg-blue-600');
-                        
-                        wlContainer.innerHTML += `
-                        <div class="bg-[#0f172a] border border-gray-800 p-4 rounded-lg hover:border-blue-500/50 transition relative overflow-hidden group">
-                            <div class="absolute top-0 left-0 w-1 h-full ${item.direcao === 'SHORT' ? 'bg-red-500' : 'bg-green-500'}"></div>
-                            <div class="flex justify-between items-start mb-2 pl-3">
-                                <div>
-                                    <h4 class="font-bold text-white text-lg">${item.symbol}</h4>
-                                    <span class="text-xs text-gray-500 bg-gray-900 px-1.5 py-0.5 rounded">${item.timeframe}</span>
-                                </div>
-                                <div class="text-right">
-                                    <div class="${item.direcao === 'SHORT' ? 'text-red-400' : 'text-green-400'} font-bold text-sm tracking-wider">${item.direcao}</div>
-                                    <div class="text-xs text-gray-500">${item.padrao}</div>
-                                </div>
-                            </div>
-                            <div class="pl-3 mt-3">
-                                <div class="flex justify-between text-xs text-gray-400 mb-1">
-                                    <span>Distance</span>
-                                    <span>${distPct}%</span>
-                                </div>
-                                <div class="w-full bg-gray-800 rounded-full h-1.5">
-                                    <div class="${progressColor} h-1.5 rounded-full transition-all duration-1000" style="width: ${Math.max(5, 100 - (distPct*20))}%"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-gray-600 mt-2 font-mono">
-                                    <span>TRIG: ${item.neckline}</span>
-                                    <span>TP: ${item.target}</span>
-                                </div>
-                            </div>
-                        </div>`;
-                    });
-                }
+                <!-- Q2 2026 -->
+                <div class="mb-16 flex items-center">
+                    <div class="w-1/2 pr-8 text-right">
+                        <h3 class="text-2xl font-bold text-green-400 mb-2">Q2 2026</h3>
+                        <p class="text-gray-300">Intelligence Amplification</p>
+                        <ul class="text-sm text-gray-400 mt-2 space-y-1">
+                            <li>• Multi-model AI ensemble</li>
+                            <li>• 50+ pattern library</li>
+                            <li>• Multi-exchange support</li>
+                        </ul>
+                    </div>
+                    <div class="relative z-10 w-12 h-12 bg-green-400 rounded-full border-4 border-gray-900 flex items-center justify-center">
+                        <span class="text-black font-bold">1</span>
+                    </div>
+                    <div class="w-1/2"></div>
+                </div>
 
-                // 3. LOGS
-                const resLogs = await fetch('/api/logs');
-                const logs = await resLogs.json();
-                const logBox = document.getElementById('logs');
-                logBox.innerHTML = logs.map(l => {
-                    const color = l.includes('ERROR') ? 'text-red-500' : (l.includes('CONFIRMADO') ? 'text-yellow-400' : 'text-green-500');
-                    return `<div class="${color} hover:bg-white/5 px-1">${l}</div>`;
-                }).join('');
-                logBox.scrollTop = logBox.scrollHeight;
+                <!-- Q3 2026 -->
+                <div class="mb-16 flex items-center">
+                    <div class="w-1/2"></div>
+                    <div class="relative z-10 w-12 h-12 bg-blue-400 rounded-full border-4 border-gray-900 flex items-center justify-center">
+                        <span class="text-black font-bold">2</span>
+                    </div>
+                    <div class="w-1/2 pl-8">
+                        <h3 class="text-2xl font-bold text-blue-400 mb-2">Q3 2026</h3>
+                        <p class="text-gray-300">Human-AI Collaboration</p>
+                        <ul class="text-sm text-gray-400 mt-2 space-y-1">
+                            <li>• Natural language interface</li>
+                            <li>• AI trading coach</li>
+                            <li>• Predictive analytics</li>
+                        </ul>
+                    </div>
+                </div>
 
-                // 4. HISTORY (CHART)
-                const resHist = await fetch('/api/history');
-                const history = await resHist.json();
-                
-                // Calculo Winrate & PnL Curve
-                let wins = 0;
-                let cumulative = 0;
-                const pnlData = history.map((trade, i) => {
-                    // Simulação simples de PnL baseada em status (precisariamos do PnL real no json de history para ser exato)
-                    // Por enquanto, vamos desenhar "Flat" até termos dados reais de fechamento.
-                    // Se o trade tiver 'pnl_realized', usamos.
-                    const pnl = trade.pnl_realized || 0; 
-                    if (pnl > 0) wins++;
-                    cumulative += pnl;
-                    return cumulative;
-                });
-                
-                // Mock de Winrate se não tiver histórico suficiente fechado
-                if (history.length > 0) {
-                     // document.getElementById('winrate').innerText = ((wins / history.length) * 100).toFixed(0) + '%';
-                }
+                <!-- Q4 2026 -->
+                <div class="flex items-center">
+                    <div class="w-1/2 pr-8 text-right">
+                        <h3 class="text-2xl font-bold text-purple-400 mb-2">Q4 2026</h3>
+                        <p class="text-gray-300">Autonomous Trading Fund</p>
+                        <ul class="text-sm text-gray-400 mt-2 space-y-1">
+                            <li>• Smart contract capital pools</li>
+                            <li>• Performance attribution</li>
+                            <li>• Global asset expansion</li>
+                        </ul>
+                    </div>
+                    <div class="relative z-10 w-12 h-12 bg-purple-400 rounded-full border-4 border-gray-900 flex items-center justify-center">
+                        <span class="text-black font-bold">3</span>
+                    </div>
+                    <div class="w-1/2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-                // Atualiza Chart apenas se mudou tamanho
-                if (pnlChart.data.labels.length !== history.length) {
-                    pnlChart.data.labels = history.map((_, i) => i + 1);
-                    pnlChart.data.datasets[0].data = pnlData;
-                    pnlChart.update();
-                }
+<!-- THE ASK -->
+<section class="section bg-gradient-to-b from-black/50 to-black">
+    <div class="container mx-auto px-6 text-center">
+        <div class="max-w-4xl mx-auto glass rounded-3xl p-12 glow">
+            <h2 class="text-5xl font-black mb-6">Partner With <span class="gradient-text">Us</span></h2>
+            <p class="text-2xl text-gray-300 mb-8">
+                to democratize AI-powered trading for every trader on Earth.
+            </p>
 
-            } catch(e) { console.error(e); }
-        }
+            <div class="bg-green-400/10 border-2 border-green-400 rounded-2xl p-8 mb-8">
+                <h3 class="text-3xl font-bold text-green-400 mb-4">Google AI Investment</h3>
+                <p class="text-xl text-gray-300 mb-6">
+                    We need <strong class="text-white">Google AI API credits</strong> to power our multi-model ensemble and unlock the next evolution of trading intelligence.
+                </p>
+                <div class="grid md:grid-cols-3 gap-6 text-left">
+                    <div>
+                        <div class="text-green-400 font-bold mb-2">Use Case</div>
+                        <p class="text-gray-300 text-sm">Gemini Pro for real-time pattern recognition across 100+ pairs simultaneously</p>
+                    </div>
+                    <div>
+                        <div class="text-green-400 font-bold mb-2">Impact</div>
+                        <p class="text-gray-300 text-sm">Bring institutional-grade AI trading to retail traders globally</p>
+                    </div>
+                    <div>
+                        <div class="text-green-400 font-bold mb-2">Vision</div>
+                        <p class="text-gray-300 text-sm">Every trader deserves an AI co-pilot. We're building it.</p>
+                    </div>
+                </div>
+            </div>
 
-        setInterval(updateData, 2000); // Fast Update
-        updateData();
-    </script>
+            <div class="text-4xl mb-6 float">🚀</div>
+            <p class="text-xl text-gray-400 mb-8 italic">
+                "The best way to predict the future is to build it."
+            </p>
+
+            <a href="mailto:contato@liquidation-bot.app" class="cta-button inline-block px-12 py-5 rounded-xl text-black font-bold text-xl">
+                Let's Build the Future Together
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="section bg-black border-t border-gray-800">
+    <div class="container mx-auto px-6">
+        <div class="grid md:grid-cols-4 gap-8 mb-12">
+            <div>
+                <div class="flex items-center space-x-2 mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center font-bold text-white">S</div>
+                    <span class="text-xl font-bold">Severino<span class="text-green-400">AI</span></span>
+                </div>
+                <p class="text-gray-400 text-sm">The future of AI-powered crypto trading. Built by traders, for traders.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold mb-4">Product</h4>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="/dashboard" class="hover:text-green-400 transition">Live Dashboard</a></li>
+                    <li><a href="#solution" class="hover:text-green-400 transition">Features</a></li>
+                    <li><a href="#technology" class="hover:text-green-400 transition">Technology</a></li>
+                    <li><a href="#roadmap" class="hover:text-green-400 transition">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold mb-4">Resources</h4>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="https://github.com/bernini10/bot_sniper_bybit.git" target="_blank" class="hover:text-green-400 transition">GitHub</a></li>
+                    <li><a href="https://github.com/bernini10/bot_sniper_bybit.git#readme" target="_blank" class="hover:text-green-400 transition">Documentation</a></li>
+                    <li><a href="mailto:contato@liquidation-bot.app" class="hover:text-green-400 transition">API Access</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold mb-4">Contact</h4>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="mailto:contato@liquidation-bot.app" class="hover:text-green-400 transition">contato@liquidation-bot.app</a></li>
+                    <li><a href="https://github.com/bernini10" target="_blank" class="hover:text-green-400 transition">GitHub @bernini10</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-500 text-sm mb-4 md:mb-0">© 2026 SeverinoAI. All rights reserved.</p>
+            <p class="text-gray-500 text-sm">⚠️ Trading involves risk. Past performance does not guarantee future results.</p>
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>

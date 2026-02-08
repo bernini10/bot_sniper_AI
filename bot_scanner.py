@@ -6,7 +6,7 @@ import logging
 import ccxt
 from datetime import datetime
 from lib_padroes import AnalistaTecnico
-from lib_utils import JsonManager, check_btc_trend
+from lib_utils import JsonManager, check_btc_trend, get_market_analysis, should_trade_in_scenario
 
 # Configuração de Logs
 logging.basicConfig(
@@ -44,8 +44,8 @@ class ScannerBybit:
         wl = self.watchlist_mgr.read()
         if not wl or 'max_slots' not in wl:
             # Inicializa se vazio ou corrompido
-            default_wl = {'max_slots': 5, 'slots_ocupados': 0, 'pares': []}
-            return 5, default_wl
+            default_wl = {'max_slots': 10, 'slots_ocupados': 0, 'pares': []}
+            return 10, default_wl
 
         # Limpeza de slots fantasmas (Phase 1 Fix)
         wl['slots_ocupados'] = len(wl['pares'])
@@ -70,9 +70,10 @@ class ScannerBybit:
     def scan(self):
         logger.info(">>> Iniciando Ciclo de Scan (30 Pares x Multi-TF) <<<")
         
-        # Phase 2: Checar Tendência Macro do BTC
-        tendencia_btc = check_btc_trend(self.exchange)
-        logger.info(f"Tendência Macro BTC (4h): {tendencia_btc}")
+        # SEVERINO: Análise Completa de Mercado (BTC + BTC.D + Cenário)
+        market = get_market_analysis(self.exchange, timeframe='4h')
+        logger.info(f"📊 Mercado: BTC={market['btc_trend']} | BTC.D={market['btcd_trend']} | Cenário #{market['scenario_number']}: {market['scenario_name']}")
+        logger.info(f"   {market['scenario_description']}")
 
         livres, watchlist_data = self.verificar_slots_livres()
         if livres <= 0:
@@ -104,9 +105,14 @@ class ScannerBybit:
                     padrao = self.analista.analisar_par(par, candles)
                     
                     if padrao:
-                        # Phase 2: Filtro de Correlação com BTC
-                        if tendencia_btc != 'NEUTRAL' and padrao.direcao != tendencia_btc:
-                            logger.info(f"Ignorando {padrao.nome} em {par}: Contra tendência do BTC ({tendencia_btc})")
+                        # SEVERINO: Filtro de Correlação BTC/BTC.D/Cenário
+                        should_trade, reason = should_trade_in_scenario(
+                            market['scenario_number'], 
+                            padrao.direcao
+                        )
+                        
+                        if not should_trade:
+                            logger.info(f"❌ Ignorando {padrao.nome} {padrao.direcao} em {par}: {reason}")
                             continue
 
                         logger.info(f"🚨 PADRAO CONFIRMADO EM {par} [{tf}]: {padrao.nome} ({padrao.direcao})")
