@@ -1,0 +1,127 @@
+{
+  "max_slots": 10,
+  "slots_ocupados": 10,
+  "pares": [
+    {
+      "symbol": "ADA/USDT",
+      "timeframe": "15m",
+      "padrao": "TOPO_DUPLO",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7583705839942322,
+      "neckline": 0.272,
+      "target": 0.26660000000000006,
+      "stop_loss": 0.280174,
+      "timestamp_descoberta": 1771031972
+    },
+    {
+      "symbol": "DOT/USDT",
+      "timeframe": "15m",
+      "padrao": "TOPO_DUPLO",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7637278106508875,
+      "neckline": 1.326,
+      "target": 1.3,
+      "stop_loss": 1.36552,
+      "timestamp_descoberta": 1771032110
+    },
+    {
+      "symbol": "FIL/USDT",
+      "timeframe": "15m",
+      "padrao": "TOPO_DUPLO",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7738271604938272,
+      "neckline": 0.947,
+      "target": 0.9249999999999999,
+      "stop_loss": 0.97869,
+      "timestamp_descoberta": 1771033023
+    },
+    {
+      "symbol": "GRT/USDT",
+      "timeframe": "15m",
+      "padrao": "TOPO_DUPLO",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7657295754548699,
+      "neckline": 0.02753,
+      "target": 0.02703,
+      "stop_loss": 0.0283103,
+      "timestamp_descoberta": 1771033292
+    },
+    {
+      "symbol": "BCH/USDT",
+      "timeframe": "1h",
+      "padrao": "CUNHA_ASCENDENTE",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7231715312146528,
+      "neckline": 494.1,
+      "target": 455.65000000000003,
+      "stop_loss": 579.5649999999999,
+      "timestamp_descoberta": 1771033519
+    },
+    {
+      "symbol": "LINK/USDT",
+      "timeframe": "1h",
+      "padrao": "OCO",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.8063779527559055,
+      "neckline": 8.39,
+      "target": 7.860000000000001,
+      "stop_loss": 9.023349999999999,
+      "timestamp_descoberta": 1771033764
+    },
+    {
+      "symbol": "HBAR/USDT",
+      "timeframe": "15m",
+      "padrao": "CUNHA_ASCENDENTE",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7441222870376103,
+      "neckline": 0.09156,
+      "target": 0.083515,
+      "stop_loss": 0.10926474999999998,
+      "timestamp_descoberta": 1771035149
+    },
+    {
+      "symbol": "QNT/USDT",
+      "timeframe": "15m",
+      "padrao": "TOPO_DUPLO",
+      "direcao": "SHORT",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7600701754385967,
+      "neckline": 70.08,
+      "target": 68.91,
+      "stop_loss": 71.9625,
+      "timestamp_descoberta": 1771036604
+    },
+    {
+      "symbol": "XLM/USDT",
+      "timeframe": "15m",
+      "padrao": "TRIANGULO_ASCENDENTE",
+      "direcao": "LONG",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.8352631578947368,
+      "neckline": 0.1672,
+      "target": 0.16984,
+      "stop_loss": 0.162261,
+      "timestamp_descoberta": 1771036652
+    },
+    {
+      "symbol": "SAND/USDT",
+      "timeframe": "15m",
+      "padrao": "BANDEIRA_ALTA",
+      "direcao": "LONG",
+      "status": "EM_FORMACAO",
+      "confiabilidade": 0.7452643948296122,
+      "neckline": 0.0903,
+      "target": 0.09378,
+      "stop_loss": 0.08751600000000001,
+      "timestamp_descoberta": 1771037362
+    }
+  ],
+  "updated_at": "2026-02-14 02:49:22.615458"
+}

@@ -7,6 +7,7 @@ import ccxt
 from datetime import datetime
 from lib_padroes import AnalistaTecnico
 from lib_utils import JsonManager, check_btc_trend, get_market_analysis, should_trade_in_scenario
+from brain_collector import collector # SEVERINO: Brain Connection
 
 # Configuração de Logs
 logging.basicConfig(
@@ -67,6 +68,22 @@ class ScannerBybit:
         except:
             return False
 
+    def is_blacklisted(self, symbol, padrao, timeframe):
+        """Phase 3: Smart Blacklist Check"""
+        BLACKLIST_FILE = 'smart_blacklist.json'
+        try:
+            if not os.path.exists(BLACKLIST_FILE): return False
+            with open(BLACKLIST_FILE, 'r') as f: bl = json.load(f)
+            
+            key = f"{symbol}_{padrao}_{timeframe}"
+            if key in bl:
+                expire = bl[key]['expire']
+                if time.time() < expire:
+                    logger.info(f"🚫 Ignorando {key} (Blacklist até {datetime.fromtimestamp(expire)})")
+                    return True
+            return False
+        except: return False
+
     def scan(self):
         logger.info(">>> Iniciando Ciclo de Scan (30 Pares x Multi-TF) <<<")
         
@@ -105,6 +122,10 @@ class ScannerBybit:
                     padrao = self.analista.analisar_par(par, candles)
                     
                     if padrao:
+                        # CHECK BLACKLIST
+                        if self.is_blacklisted(par, padrao.nome, tf):
+                            continue
+
                         # SEVERINO: Filtro de Correlação BTC/BTC.D/Cenário
                         should_trade, reason = should_trade_in_scenario(
                             market['scenario_number'], 
@@ -116,6 +137,9 @@ class ScannerBybit:
                             continue
 
                         logger.info(f"🚨 PADRAO CONFIRMADO EM {par} [{tf}]: {padrao.nome} ({padrao.direcao})")
+                        
+                        # SEVERINO: Coleta de Inteligência para Vision AI
+                        collector.collect(par, tf, padrao.nome, padrao.direcao, candles)
                         
                         novo_item = {
                             "symbol": par,

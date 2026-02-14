@@ -72,6 +72,25 @@ def webhook_btcd():
             except:
                 pass
         
+        # Tentar 4: Parsear texto legado do TradingView (ex: "Cruzando 59,37% em BTC.D, 4h")
+        if not data:
+            try:
+                import re
+                raw_data = request.get_data(as_text=True)
+                # Extrair valor do BTC.D do texto
+                match = re.search(r'(\d+[.,]\d+)\s*%\s*em\s*BTC\.?D', raw_data, re.IGNORECASE)
+                if match:
+                    btcd_val = float(match.group(1).replace(',', '.'))
+                    data = {
+                        'btc_d_value': btcd_val,
+                        'direction': 'UNKNOWN',
+                        'change_pct': 0,
+                        '_parsed_from_text': True
+                    }
+                    logger.warning(f"⚠️ Webhook recebido como texto - parseado: BTC.D={btcd_val}%. Corrija o alerta no TV para usar {{{{alert.message}}}}")
+            except Exception as e:
+                logger.error(f"Erro ao parsear texto: {e}")
+
         # Se ainda não tem dados, logar o que veio
         if not data:
             raw_data = request.get_data(as_text=True)

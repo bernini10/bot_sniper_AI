@@ -62,13 +62,46 @@ def analisar_padrao(symbol, timeframe):
         logger.error(f"Erro ao analisar padrão para {symbol}: {e}")
         return None
 
+def adicionar_smart_blacklist(symbol, padrao, timeframe, motivo):
+    """Bloqueia combinação (Par + Padrão + TF) por 6 horas"""
+    BLACKLIST_FILE = os.path.join(BASE_DIR, 'smart_blacklist.json')
+    try:
+        bl = {}
+        if os.path.exists(BLACKLIST_FILE):
+            with open(BLACKLIST_FILE, 'r') as f: bl = json.load(f)
+        
+        key = f"{symbol}_{padrao}_{timeframe}"
+        expire_at = time.time() + (6 * 3600) # 6 horas
+        
+        bl[key] = {
+            'expire': expire_at,
+            'reason': motivo
+        }
+        
+        # Limpar expirados
+        now = time.time()
+        bl = {k:v for k,v in bl.items() if v['expire'] > now}
+        
+        with open(BLACKLIST_FILE, 'w') as f: json.dump(bl, f, indent=2)
+        logger.info(f"🚫 {key} adicionado à Smart Blacklist por 6h ({motivo})")
+    except Exception as e:
+        logger.error(f"Erro ao atualizar blacklist: {e}")
+
 def invalidar_par(wl, idx, motivo):
     try:
-        symbol = wl['pares'][idx]['symbol']
+        par = wl['pares'][idx]
+        symbol = par['symbol']
+        padrao = par['padrao']
+        timeframe = par['timeframe']
+        
         del wl['pares'][idx]
         wl['slots_ocupados'] = len(wl['pares'])
         watchlist_mgr.write(wl)
         logger.info(f"Par {symbol} removido: {motivo}")
+        
+        # Adicionar à Blacklist Inteligente
+        adicionar_smart_blacklist(symbol, padrao, timeframe, motivo)
+        
         try:
             bot.send_message(CHAT_ID, f"❌ PADRÃO INVALIDADO: {symbol}. Motivo: {motivo}", parse_mode='Markdown')
         except: pass

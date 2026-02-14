@@ -1,0 +1,30 @@
+{
+  "APT/USDT_FUNDO_DUPLO_15m": {
+    "expire": 1771053324.8697772,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  },
+  "DOGE/USDT_TOPO_DUPLO_30m": {
+    "expire": 1771054211.5497622,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  },
+  "AAVE/USDT_OCO_15m": {
+    "expire": 1771055130.6040075,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  },
+  "AVAX/USDT_OCO_15m": {
+    "expire": 1771056939.9574072,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  },
+  "UNI/USDT_OCO_15m": {
+    "expire": 1771057827.5716703,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  },
+  "ATOM/USDT_CUNHA_ASCENDENTE_15m": {
+    "expire": 1771057859.8696656,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  },
+  "NEAR/USDT_TRIANGULO_ASCENDENTE_15m": {
+    "expire": 1771058732.4880164,
+    "reason": "Padr\u00e3o mudou a configura\u00e7\u00e3o"
+  }
+}

@@ -1,0 +1,452 @@
+[
+  {
+    "symbol": "LDO/USDT",
+    "side": "SHORT",
+    "entry_price": 0.3367,
+    "size": 120.5,
+    "risco_estimado": 1.513494177,
+    "opened_at": "2026-02-10 18:34:47.768358",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOGE/USDT",
+    "side": "SHORT",
+    "entry_price": 0.09231,
+    "size": 244.0,
+    "risco_estimado": 1.500213932,
+    "opened_at": "2026-02-10 18:47:34.050795",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "NEAR/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9824,
+    "size": 38.8,
+    "risco_estimado": 1.4995945985,
+    "opened_at": "2026-02-10 18:47:36.329004",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "SOL/USDT",
+    "side": "SHORT",
+    "entry_price": 82.75,
+    "size": 0.2,
+    "risco_estimado": 1.4985465635000002,
+    "opened_at": "2026-02-10 18:48:19.410482",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "XLM/USDT",
+    "side": "SHORT",
+    "entry_price": 0.15612,
+    "size": 157.0,
+    "risco_estimado": 1.4980914385000001,
+    "opened_at": "2026-02-10 18:48:21.628584",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "SOL/USDT",
+    "side": "SHORT",
+    "entry_price": 82.88,
+    "size": 0.2,
+    "risco_estimado": 1.497417492,
+    "opened_at": "2026-02-10 18:52:00.268124",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "SOL/USDT",
+    "side": "SHORT",
+    "entry_price": 82.82,
+    "size": 0.2,
+    "risco_estimado": 1.4721196140000001,
+    "opened_at": "2026-02-10 19:03:26.004179",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "NEAR/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9825,
+    "size": 38.1,
+    "risco_estimado": 1.470708429,
+    "opened_at": "2026-02-10 19:17:57.504248",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "NEAR/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9831,
+    "size": 40.8,
+    "risco_estimado": 1.467784623,
+    "opened_at": "2026-02-10 19:20:31.588776",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "NEAR/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9826,
+    "size": 40.2,
+    "risco_estimado": 1.4666815845,
+    "opened_at": "2026-02-10 19:23:03.380530",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "NEAR/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9826,
+    "size": 40.2,
+    "risco_estimado": 1.4655954305,
+    "opened_at": "2026-02-10 19:26:21.699954",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "ETC/USDT",
+    "side": "SHORT",
+    "entry_price": 8.304,
+    "size": 6.9,
+    "risco_estimado": 1.4539699365,
+    "opened_at": "2026-02-10 19:53:31.656235",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "SAND/USDT",
+    "side": "SHORT",
+    "entry_price": 0.08444,
+    "size": 579.0,
+    "risco_estimado": 1.458413122,
+    "opened_at": "2026-02-11 00:43:17.694294",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "LINK/USDT",
+    "side": "SHORT",
+    "entry_price": 8.452,
+    "size": 4.2,
+    "risco_estimado": 1.4461656935000002,
+    "opened_at": "2026-02-11 04:24:25.149806",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BCH/USDT",
+    "side": "SHORT",
+    "entry_price": 510.6,
+    "size": 0.05,
+    "risco_estimado": 1.4509372085,
+    "opened_at": "2026-02-11 10:05:38.122666",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "APT/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9236,
+    "size": 40.65,
+    "risco_estimado": 1.4460311335,
+    "opened_at": "2026-02-11 23:54:20.064213",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "APT/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9236,
+    "size": 40.62,
+    "risco_estimado": 1.4449987755000002,
+    "opened_at": "2026-02-11 23:56:30.846521",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BCH/USDT",
+    "side": "SHORT",
+    "entry_price": 511.8,
+    "size": 0.08,
+    "risco_estimado": 1.4193785445,
+    "opened_at": "2026-02-12 04:52:35.438583",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BCH/USDT",
+    "side": "SHORT",
+    "entry_price": 509.2,
+    "size": 0.09,
+    "risco_estimado": 1.4215294845000002,
+    "opened_at": "2026-02-12 05:11:28.667476",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BCH/USDT",
+    "side": "SHORT",
+    "entry_price": 508.4,
+    "size": 0.06,
+    "risco_estimado": 1.4239616670000002,
+    "opened_at": "2026-02-12 06:07:55.536219",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "AVAX/USDT",
+    "side": "LONG",
+    "entry_price": 8.841,
+    "size": 7.3,
+    "risco_estimado": 1.415380152,
+    "opened_at": "2026-02-12 09:31:32.129867",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "NEAR/USDT",
+    "side": "LONG",
+    "entry_price": 0.9914,
+    "size": 54.1,
+    "risco_estimado": 1.4114652895000002,
+    "opened_at": "2026-02-12 09:33:20.501176",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "GRT/USDT",
+    "side": "LONG",
+    "entry_price": 0.02715,
+    "size": 2094.5,
+    "risco_estimado": 1.4099899885,
+    "opened_at": "2026-02-12 09:34:04.055828",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOT/USDT",
+    "side": "LONG",
+    "entry_price": 1.2932,
+    "size": 46.4,
+    "risco_estimado": 1.4122697285,
+    "opened_at": "2026-02-12 09:34:25.714518",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOT/USDT",
+    "side": "LONG",
+    "entry_price": 1.2923,
+    "size": 47.4,
+    "risco_estimado": 1.3999760865000002,
+    "opened_at": "2026-02-12 09:49:01.735363",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "UNI/USDT",
+    "side": "SHORT",
+    "entry_price": 3.387,
+    "size": 13.6,
+    "risco_estimado": 1.394238624,
+    "opened_at": "2026-02-12 11:13:07.483312",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "SOL/USDT",
+    "side": "LONG",
+    "entry_price": 82.05,
+    "size": 0.6,
+    "risco_estimado": 1.3902300845,
+    "opened_at": "2026-02-12 11:28:32.324729",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "QNT/USDT",
+    "side": "SHORT",
+    "entry_price": 68.18,
+    "size": 0.54,
+    "risco_estimado": 1.3896206195,
+    "opened_at": "2026-02-12 12:16:31.609248",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "FIL/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9058,
+    "size": 61.3,
+    "risco_estimado": 1.4046605980000002,
+    "opened_at": "2026-02-12 15:09:14.178029",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "OP/USDT",
+    "side": "SHORT",
+    "entry_price": 0.17944,
+    "size": 260.2,
+    "risco_estimado": 1.4031336455,
+    "opened_at": "2026-02-12 15:10:19.420632",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOGE/USDT",
+    "side": "LONG",
+    "entry_price": 0.09434,
+    "size": 486.0,
+    "risco_estimado": 1.3816520685000002,
+    "opened_at": "2026-02-12 15:24:15.241174",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "FIL/USDT",
+    "side": "SHORT",
+    "entry_price": 0.9055,
+    "size": 59.5,
+    "risco_estimado": 1.381558754,
+    "opened_at": "2026-02-12 15:41:48.776141",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "LTC/USDT",
+    "side": "SHORT",
+    "entry_price": 52.49,
+    "size": 0.8,
+    "risco_estimado": 1.374428214,
+    "opened_at": "2026-02-12 16:06:29.257746",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "AVAX/USDT",
+    "side": "SHORT",
+    "entry_price": 8.689,
+    "size": 5.5,
+    "risco_estimado": 1.3732732140000001,
+    "opened_at": "2026-02-12 16:20:46.870422",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "LTC/USDT",
+    "side": "SHORT",
+    "entry_price": 51.94,
+    "size": 0.8,
+    "risco_estimado": 1.371959154,
+    "opened_at": "2026-02-12 16:22:31.005896",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOGE/USDT",
+    "side": "SHORT",
+    "entry_price": 0.09148,
+    "size": 368.0,
+    "risco_estimado": 1.3708164740000002,
+    "opened_at": "2026-02-12 16:22:32.284652",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "LTC/USDT",
+    "side": "SHORT",
+    "entry_price": 51.92,
+    "size": 0.8,
+    "risco_estimado": 1.3742467745000002,
+    "opened_at": "2026-02-12 16:29:03.591223",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOGE/USDT",
+    "side": "SHORT",
+    "entry_price": 0.09142,
+    "size": 360.0,
+    "risco_estimado": 1.3613489545000002,
+    "opened_at": "2026-02-12 16:53:28.199697",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "GRT/USDT",
+    "side": "LONG",
+    "entry_price": 0.02762,
+    "size": 560.4,
+    "risco_estimado": 1.3532355715,
+    "opened_at": "2026-02-13 15:33:15.001807",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "ETC/USDT",
+    "side": "LONG",
+    "entry_price": 8.402,
+    "size": 3.3,
+    "risco_estimado": 1.3528099195,
+    "opened_at": "2026-02-13 15:46:49.815964",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "ETC/USDT",
+    "side": "LONG",
+    "entry_price": 8.403,
+    "size": 3.3,
+    "risco_estimado": 1.3520475285,
+    "opened_at": "2026-02-13 15:48:37.046989",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOT/USDT",
+    "side": "LONG",
+    "entry_price": 1.3043,
+    "size": 19.6,
+    "risco_estimado": 1.351284527,
+    "opened_at": "2026-02-13 15:50:45.267501",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "ADA/USDT",
+    "side": "LONG",
+    "entry_price": 0.2691,
+    "size": 92.0,
+    "risco_estimado": 1.3507536095000001,
+    "opened_at": "2026-02-13 16:00:50.299886",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "ETC/USDT",
+    "side": "LONG",
+    "entry_price": 8.404,
+    "size": 3.2,
+    "risco_estimado": 1.3500725335000001,
+    "opened_at": "2026-02-13 16:01:09.382960",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "UNI/USDT",
+    "side": "LONG",
+    "entry_price": 3.466,
+    "size": 7.1,
+    "risco_estimado": 1.3493328930000001,
+    "opened_at": "2026-02-13 16:06:00.881436",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "XLM/USDT",
+    "side": "LONG",
+    "entry_price": 0.16357,
+    "size": 93.0,
+    "risco_estimado": 1.3486561565000001,
+    "opened_at": "2026-02-13 16:16:19.236112",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "UNI/USDT",
+    "side": "LONG",
+    "entry_price": 3.474,
+    "size": 6.8,
+    "risco_estimado": 1.348237877,
+    "opened_at": "2026-02-13 16:39:40.725204",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "TRX/USDT",
+    "side": "LONG",
+    "entry_price": 0.2808,
+    "size": 191.0,
+    "risco_estimado": 1.3475882390000002,
+    "opened_at": "2026-02-13 19:15:34.688476",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "DOT/USDT",
+    "side": "LONG",
+    "entry_price": 1.3421,
+    "size": 16.9,
+    "risco_estimado": 1.3129677380000002,
+    "opened_at": "2026-02-14 01:14:06.458184",
+    "status": "OPEN"
+  },
+  {
+    "symbol": "ETC/USDT",
+    "side": "LONG",
+    "entry_price": 8.616,
+    "size": 2.9,
+    "risco_estimado": 1.3123439495,
+    "opened_at": "2026-02-14 01:14:08.565049",
+    "status": "OPEN"
+  }
+]

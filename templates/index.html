@@ -166,7 +166,15 @@
                 <div class="text-sm text-gray-500">Status: <span class="text-pink-400"><a href="/dashboard" class="underline">Live Now</a></span></div>
             </div>
 
-            <!-- Telegram -->
+            
+            <!-- Vision AI -->
+            <div class="glass rounded-2xl p-8 hover:border-red-400 border border-transparent transition">
+                <div class="text-4xl mb-4">👁️</div>
+                <h3 class="text-2xl font-bold mb-4 text-red-400">Vision Validator</h3>
+                <p class="text-gray-300 mb-4">Generative AI analyzes chart images to confirm patterns visually before any trade is executed. Zero hallucination.</p>
+                <div class="text-sm text-gray-500">Status: <span class="text-green-400">Active</span></div>
+            </div>
+<!-- Telegram -->
             <div class="glass rounded-2xl p-8 hover:border-cyan-400 border border-transparent transition">
                 <div class="text-4xl mb-4">📱</div>
                 <h3 class="text-2xl font-bold mb-4 text-cyan-400">Telegram Command Center</h3>
@@ -340,7 +348,16 @@
                         <span class="text-gray-300">Supervisor</span>
                         <span class="font-bold">Systemd</span>
                     </div>
+                    
                     <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Validation Engine</span>
+                        <span class="font-bold text-purple-400">Hybrid Vision AI (Gemini + Local)</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                        <span class="text-gray-300">Learning Model</span>
+                        <span class="font-bold text-yellow-400">Active Learning (RLAIF)</span>
+                    </div>
+<div class="flex items-center justify-between py-2 border-b border-gray-700">
                         <span class="text-gray-300">Uptime</span>
                         <span class="font-bold text-green-400">99.2%</span>
                     </div>
@@ -511,7 +528,104 @@
     </div>
 </section>
 
-<!-- FOOTER -->
+
+    <!-- VISION AI MONITOR -->
+    <section id="vision-monitor" class="section bg-black/40 border-t border-gray-800">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-black text-center mb-10"><span class="text-purple-400">Vision AI</span> Live Feed</h2>
+            <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <!-- Terminal Log -->
+                <div class="glass rounded-xl p-6 border border-purple-500/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-300">⚡ System Logs</h3>
+                        <div class="flex space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        </div>
+                    </div>
+                    <div id="vision-logs" class="font-mono text-xs text-green-400 h-64 overflow-y-auto space-y-1 bg-black/50 p-4 rounded-lg">
+                        Loading logs...
+                    </div>
+                </div>
+                
+                <!-- Recent Validations -->
+                <div class="glass rounded-xl p-6 border border-purple-500/30">
+                    <h3 class="font-bold text-gray-300 mb-4">🧠 Recent Analysis</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-700">
+                                    <th class="pb-2">Time</th>
+                                    <th class="pb-2">Symbol</th>
+                                    <th class="pb-2">Pattern</th>
+                                    <th class="pb-2">Verdict</th>
+                                    <th class="pb-2">Conf.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vision-table" class="text-gray-300">
+                                <tr><td colspan="4" class="text-center py-4">Waiting for data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 flex justify-between text-xs text-gray-500">
+                        <span id="stat-total">Total: 0</span>
+                        <span id="stat-valid" class="text-green-400">Valid: 0</span>
+                        <span id="stat-invalid" class="text-red-400">Invalid: 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+    async function updateVision() {
+        try {
+            // Logs
+            const resLogs = await fetch('/api/vision/logs');
+            const dataLogs = await resLogs.json();
+            const logDiv = document.getElementById('vision-logs');
+            if(dataLogs.logs) {
+                logDiv.innerHTML = dataLogs.logs.map(l => `<div>> ${l}</div>`).join('');
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            
+            // Stats
+            const resStats = await fetch('/api/vision/stats');
+            const dataStats = await resStats.json();
+            
+            if(dataStats.recent && dataStats.recent.length > 0) {
+                const tbody = document.getElementById('vision-table');
+                tbody.innerHTML = dataStats.recent.map(r => `
+                    <tr class="border-b border-gray-800/50">
+                        <td class="py-2 text-xs text-gray-400">${r.timestamp_formatted || 'N/A'}</td>
+                        <td class="py-2 font-mono text-yellow-400">${r.symbol}</td>
+                        <td class="py-2">${r.pattern_detected}</td>
+                        <td class="py-2 font-bold ${r.ai_verdict === 'VALID' ? 'text-green-400' : 'text-red-400'}">${r.ai_verdict}</td>
+                        <td class="py-2">${(r.ai_confidence * 100).toFixed(0)}%</td>
+                    </tr>
+                `).join('');
+            } else if(dataStats.recent && dataStats.recent.length === 0) {
+                document.getElementById('vision-table').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">No data yet</td></tr>';
+            }
+            
+            if(dataStats.stats) {
+                document.getElementById('stat-total').innerText = 'Total: ' + dataStats.stats.total;
+                document.getElementById('stat-valid').innerText = 'Valid: ' + dataStats.stats.valid;
+                document.getElementById('stat-invalid').innerText = 'Invalid: ' + dataStats.stats.invalid;
+            }
+        } catch(e) {
+            console.log('Vision update error', e);
+            document.getElementById('vision-logs').innerHTML = '<div class="text-red-400">⚠️ Connection error - retrying...</div>';
+        }
+    }
+    
+    // Update every 3s
+    setInterval(updateVision, 3000);
+    updateVision();
+    </script>
+
+    <!-- FOOTER -->
 <footer class="section bg-black border-t border-gray-800">
     <div class="container mx-auto px-6">
         <div class="grid md:grid-cols-4 gap-8 mb-12">

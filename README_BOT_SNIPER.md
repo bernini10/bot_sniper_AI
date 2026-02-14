@@ -58,3 +58,17 @@ Ao editar, respeite:
 
 ---
 *Assinado: Severino (v2.0 Refactor)*
+
+## 🧠 Roadmap: Arquitetura de Inteligência Híbrida (Active Learning)
+
+### Fase 1: O Professor (Vision AI Validation)
+- Integração com Gemini Pro Vision / GPT-4o para validar visualmente os padrões detectados pelo scanner clássico.
+- Implementação de um banco de dados `sniper_brain.db` para registrar cada padrão encontrado e o veredito da IA.
+
+### Fase 2: O Aluno (Rede Neural Local)
+- Treinamento contínuo de um modelo ML leve usando os dados rotulados pela IA Vision.
+- Filtragem prévia de sinais falsos localmente para reduzir custos de API e latência.
+
+### Fase 3: Feedback Loop Financeiro (RLHF - Real Market Feedback)
+- **Análise de Loss:** Se um padrão for validado pela IA mas resultar em prejuízo, o evento é marcado como "Falso Positivo de Mercado".
+- O sistema recalibra os pesos para desconfiar de padrões semelhantes em condições de mercado idênticas, superando a própria análise teórica da IA.

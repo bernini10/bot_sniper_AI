@@ -23,7 +23,7 @@ logger = logging.getLogger("ExecutorBybit")
 
 # --- CONFIGURAÇÃO DE RISCO (FASE 3) ---
 RISK_PER_TRADE = 0.05  # Arrisca 5% da banca por trade
-MAX_LEVERAGE = 10       # Alavancagem máxima permitida
+MAX_LEVERAGE = 5        # Alavancagem máxima permitida
 
 class ExecutorBybit:
     def __init__(self, symbol):
@@ -191,9 +191,10 @@ class ExecutorBybit:
                     'neckline': self.alvo_dados.get('neckline'),
                     'target': self.alvo_dados.get('target'),
                     'stop_loss': self.alvo_dados.get('stop_loss')
-                }
+                },
+                timeframe=self.alvo_dados.get('timeframe', '5m')
             )
-            logger.info(f"🔍 Validação pós-entrada ATIVADA para {self.symbol}")
+            logger.info(f"🔍 Validação pós-entrada ATIVADA para {self.symbol} (TF: {self.alvo_dados.get('timeframe', '5m')})")
             
             return order, side, price
             
@@ -308,7 +309,7 @@ class ExecutorBybit:
                             # Método correto para Bybit V5 via ccxt
                             response = self.exchange.privatePostV5PositionTradingStop({
                                 'category': 'linear',
-                                'symbol': self.target_symbol_final.replace('/', '').replace(':USDT', 'USDT'),
+                                'symbol': self.target_symbol_final.replace('/', '').replace(':USDT', ''),
                                 'stopLoss': str(new_sl),
                                 'positionIdx': 0  # One-Way Mode
                             })

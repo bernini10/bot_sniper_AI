@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Severino Sniper Dashboard Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0b0f19; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; }
+        .card { background-color: #151b2b; border: 1px solid #2d3748; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .glass { background: rgba(21, 27, 43, 0.7); backdrop-filter: blur(10px); }
+        .pulse-green { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+        .text-neon-green { color: #00ff9d; text-shadow: 0 0 10px rgba(0, 255, 157, 0.5); }
+        .text-neon-red { color: #ff0055; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
+        .log-terminal { background-color: #050505; color: #00ff00; font-family: 'Courier New', monospace; border: 1px solid #333; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a5568; }
+        .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 157, 0.2); }
+        .back-button { transition: all 0.3s ease; }
+        .back-button:hover { transform: translateX(-5px); background: rgba(0, 255, 157, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="back-button flex items-center space-x-2 px-4 py-2 rounded-lg border border-green-400/30 text-green-400 hover:border-green-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span class="font-semibold">Back to Home</span>
+            </a>
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center font-bold text-white text-sm">S</div>
+                <span class="text-lg font-bold">Severino<span class="text-green-400">AI</span> Dashboard</span>
+            </div>
+            <a href="https://github.com/bernini10/bot_sniper_bybit.git" target="_blank" class="px-4 py-2 rounded-lg glass border border-white/20 hover:border-green-400 transition text-sm font-semibold hidden md:block">
+                GitHub
+            </a>
+        </div>
+    </nav>
+
+    <div class="pt-24 p-6">
+
+    <!-- TOP BAR -->
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-green-500 rounded-full pulse-green"></div>
+            <h1 class="text-2xl font-bold tracking-wider text-white">SEVERINO<span class="text-blue-500">SNIPER</span>_V2.1</h1>
+        </div>
+        <div class="text-sm text-gray-500" id="clock">00:00:00 UTC</div>
+    </div>
+
+    <!-- METRICS GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="card border-t-4 border-blue-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Total Equity</h3>
+            <p class="text-3xl font-bold mt-2 text-white" id="equity">Loading...</p>
+            <p class="text-xs text-gray-500 mt-1">Available: <span id="available">$0</span></p>
+        </div>
+        <div class="card border-t-4 border-green-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">PnL Today (Est.)</h3>
+            <p class="text-3xl font-bold mt-2" id="pnl-today">$0.00</p>
+            <p class="text-xs text-gray-500 mt-1">Unrealized PnL</p>
+        </div>
+        <div class="card border-t-4 border-purple-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Active Trades</h3>
+            <p class="text-3xl font-bold mt-2 text-white" id="open-count">0</p>
+            <p class="text-xs text-gray-500 mt-1">Positions Open</p>
+        </div>
+        <div class="card border-t-4 border-yellow-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Win Rate (Last 50)</h3>
+            <p class="text-3xl font-bold mt-2 text-yellow-400" id="winrate">--%</p>
+            <p class="text-xs text-gray-500 mt-1"><span id="winrate-detail">Last 30 days (Bybit)</span></p>
+        </div>
+    </div>
+
+    <!-- MARKET ANALYSIS (BTC.D) -->
+    <div class="card mb-8 border-l-4" id="market-card" style="border-left-color: #6b7280;">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+                <span>📊</span> Market Analysis
+                <span class="text-xs text-gray-500 font-normal ml-2">(TradingView Premium)</span>
+            </h2>
+            <div class="text-xs text-gray-500" id="market-last-update">Loading...</div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- BTC Dominance -->
+            <div class="flex flex-col items-center justify-center p-4 bg-black/30 rounded-lg">
+                <div class="text-sm text-gray-400 uppercase tracking-wide mb-2">BTC Dominance</div>
+                <div class="text-4xl font-black" id="btcd-value">--%</div>
+                <div class="text-sm mt-1" id="btcd-change">--</div>
+            </div>
+            
+            <!-- Scenario -->
+            <div class="flex flex-col justify-center p-4 bg-black/30 rounded-lg">
+                <div class="text-sm text-gray-400 uppercase tracking-wide mb-2">Current Scenario</div>
+                <div class="text-2xl font-bold mb-2" id="market-scenario">Loading...</div>
+                <div class="text-xs text-gray-400" id="market-advice">Analyzing market...</div>
+            </div>
+            
+            <!-- Trade Conditions -->
+            <div class="flex flex-col justify-center p-4 bg-black/30 rounded-lg">
+                <div class="text-sm text-gray-400 uppercase tracking-wide mb-3">Trade Conditions</div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm">LONGs (Alts):</span>
+                    <span class="text-sm font-bold" id="longs-status">⏳ Loading</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm">SHORTs (Alts):</span>
+                    <span class="text-sm font-bold" id="shorts-status">⏳ Loading</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+        
+        <!-- LEFT COL: RADAR -->
+        <div class="card col-span-1 flex flex-col h-[600px]">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <span>📡</span> Market Radar
+                <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded ml-auto" id="wl-count">0 Pairs</span>
+            </h2>
+            <div id="watchlist-container" class="space-y-4 overflow-y-auto flex-1 pr-2">
+                <!-- Watchlist Items -->
+            </div>
+        </div>
+
+        <!-- RIGHT COL: CHARTS & LOGS -->
+        <div class="col-span-1 lg:col-span-2 space-y-6">
+            
+            <!-- CHART -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold">📈 Performance Curve</h2>
+                    <span class="text-xs text-gray-500" id="chart-info">Last 50 Trades</span>
+                </div>
+                <div class="h-64">
+                    <canvas id="pnlChart"></canvas>
+                </div>
+            </div>
+
+            <!-- LOGS TERMINAL -->
+            <div class="card bg-black border-gray-800">
+                <h2 class="text-sm font-bold text-gray-500 mb-2 font-mono">>_ SYSTEM_LOGS</h2>
+                <div id="logs" class="log-terminal h-48 overflow-y-auto text-xs p-2">
+                    <div class="animate-pulse">Connecting to neural core...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISION AI POST-ENTRY ALERTS -->
+    <div class="card mt-8 border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+                <span>🛡️</span> Vision AI - Post-Entry Monitor
+                <span class="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded ml-2">Live</span>
+            </h2>
+        </div>
+        <div id="vision-alerts" class="log-terminal h-40 overflow-y-auto text-xs p-3">
+            <div class="text-gray-600">Waiting for post-entry validations...</div>
+        </div>
+    </div>
+
+    <!-- VISION AI ANALYSIS -->
+    <div class="card mt-8 border-l-4 border-purple-500">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+                <span>👁️</span> Vision AI Analysis
+                <span class="text-xs bg-purple-900 text-purple-200 px-2 py-0.5 rounded ml-2" id="vision-count">0 Analyzed</span>
+            </h2>
+            <div class="flex gap-2 text-xs">
+                <span class="text-green-400" id="vision-valid-count">✅ 0 Valid</span>
+                <span class="text-red-400" id="vision-invalid-count">❌ 0 Invalid</span>
+            </div>
+        </div>
+        <div id="vision-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="text-center text-gray-600 col-span-4 py-8">Loading AI analyses...</div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        // CLOCK
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+        }, 1000);
+
+        // CHART INIT
+        const ctx = document.getElementById('pnlChart').getContext('2d');
+        const pnlChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Cumulative PnL ($)',
+                    data: [],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'PnL: $' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { 
+                        display: true,
+                        grid: { color: '#1e293b' },
+                        ticks: { color: '#64748b' }
+                    },
+                    y: { 
+                        grid: { color: '#1e293b' }, 
+                        ticks: { 
+                            color: '#64748b',
+                            callback: function(value) {
+                                return '$' + value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        async function updateData() {
+            try {
+                // 1. STATS
+                const resStats = await fetch('/api/stats');
+                const stats = await resStats.json();
+                
+                document.getElementById('equity').innerText = `$${parseFloat(stats.equity || 0).toFixed(2)}`;
+                document.getElementById('available').innerText = `$${parseFloat(stats.available || 0).toFixed(2)}`;
+                document.getElementById('open-count').innerText = stats.active_count || 0;
+                
+                // PnL Today com cor
+                const pnlToday = parseFloat(stats.pnl_today || 0);
+                const pnlEl = document.getElementById('pnl-today');
+                pnlEl.innerText = (pnlToday >= 0 ? '+' : '') + '$' + pnlToday.toFixed(2);
+                pnlEl.className = 'text-3xl font-bold mt-2 ' + (pnlToday >= 0 ? 'text-neon-green' : 'text-neon-red');
+                
+                // 2. WIN RATE
+                const resWr = await fetch('/api/winrate');
+                const wr = await resWr.json();
+                document.getElementById('winrate').innerText = wr.winrate.toFixed(0) + '%';
+                const pnlTotal = wr.total_pnl || 0;
+                const pnlSign = pnlTotal >= 0 ? '+' : '';
+                document.getElementById('winrate-detail').innerText = `${wr.wins}W / ${wr.losses}L | ${pnlSign}${pnlTotal.toFixed(2)} USDT (30d)`;
+                
+                // 3. WATCHLIST
+                const resWl = await fetch('/api/watchlist');
+                const wl = await resWl.json();
+                document.getElementById('wl-count').innerText = `${wl.length} Pairs`;
+                
+                const wlContainer = document.getElementById('watchlist-container');
+                wlContainer.innerHTML = '';
+                
+                if (wl.length === 0) {
+                    wlContainer.innerHTML = '<div class="text-center text-gray-600 mt-10">Scanning...</div>';
+                } else {
+                    wl.forEach(item => {
+                        const distPct = item.dist_pct || 0;
+                        const progressColor = distPct < 0.2 ? 'bg-red-500' : (distPct < 1.0 ? 'bg-yellow-500' : 'bg-blue-600');
+                        
+                        wlContainer.innerHTML += `
+                        <div class="bg-[#0f172a] border border-gray-800 p-4 rounded-lg hover:border-blue-500/50 transition relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full ${item.direcao === 'SHORT' ? 'bg-red-500' : 'bg-green-500'}"></div>
+                            <div class="flex justify-between items-start mb-2 pl-3">
+                                <div>
+                                    <h4 class="font-bold text-white text-lg">${item.symbol}</h4>
+                                    <span class="text-xs text-gray-500 bg-gray-900 px-1.5 py-0.5 rounded">${item.timeframe}</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="${item.direcao === 'SHORT' ? 'text-red-400' : 'text-green-400'} font-bold text-sm tracking-wider">${item.direcao}</div>
+                                    <div class="text-xs text-gray-500">${item.padrao}</div>
+                                </div>
+                            </div>
+                            <div class="pl-3 mt-3">
+                                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                    <span>Distance</span>
+                                    <span>${distPct.toFixed(2)}%</span>
+                                </div>
+                                <div class="w-full bg-gray-800 rounded-full h-1.5">
+                                    <div class="${progressColor} h-1.5 rounded-full transition-all duration-1000" style="width: ${Math.max(5, 100 - (distPct*20))}%"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-gray-600 mt-2 font-mono">
+                                    <span>TRIG: ${item.neckline}</span>
+                                    <span>TP: ${item.target}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                // 4. LOGS
+                const resLogs = await fetch('/api/logs');
+                const logs = await resLogs.json();
+                const logBox = document.getElementById('logs');
+                logBox.innerHTML = logs.map(l => {
+                    const color = l.includes('ERROR') ? 'text-red-500' : (l.includes('CONFIRMADO') || l.includes('ENTRY') ? 'text-yellow-400' : 'text-green-500');
+                    return `<div class="${color} hover:bg-white/5 px-1">${l}</div>`;
+                }).join('');
+                logBox.scrollTop = logBox.scrollHeight;
+
+                // 5. HISTORY (CHART)
+                const resHist = await fetch('/api/history');
+                const history = await resHist.json();
+                
+                if (history && history.length > 0) {
+                    const labels = history.map(t => t.closed_at_str || '');
+                    const pnlData = history.map(t => t.cumulative_pnl || 0);
+                    
+                    pnlChart.data.labels = labels;
+                    pnlChart.data.datasets[0].data = pnlData;
+                    
+                    // Cor dinâmica baseada no PnL final
+                    const finalPnl = pnlData[pnlData.length - 1] || 0;
+                    const color = finalPnl >= 0 ? '#00ff9d' : '#ff0055';
+                    pnlChart.data.datasets[0].borderColor = color;
+                    pnlChart.data.datasets[0].pointBackgroundColor = color;
+                    pnlChart.data.datasets[0].backgroundColor = finalPnl >= 0 ? 'rgba(0, 255, 157, 0.1)' : 'rgba(255, 0, 85, 0.1)';
+                    
+                    pnlChart.update('none');
+                    document.getElementById('chart-info').innerText = `${history.length} Closed Trades (30d)`;
+                }
+
+            } catch(e) { 
+                console.error('Update error:', e); 
+            }
+        }
+
+        // MARKET ANALYSIS (BTC.D)
+        async function fetchMarket() {
+            try {
+                const res = await fetch('/api/market');
+                const data = await res.json();
+                
+                // BTC.D Value
+                document.getElementById('btcd-value').innerText = data.btcd_value.toFixed(1) + '%';
+                
+                // Change percentage
+                const changePct = data.change_pct;
+                const changeEl = document.getElementById('btcd-change');
+                const arrow = changePct >= 0 ? '↗' : '↘';
+                const color = changePct >= 0 ? 'text-red-400' : 'text-green-400';
+                changeEl.innerHTML = `<span class="${color}">${arrow} ${Math.abs(changePct).toFixed(2)}%</span>`;
+                
+                // Scenario
+                const scenarioEl = document.getElementById('market-scenario');
+                scenarioEl.innerText = data.scenario_text;
+                scenarioEl.className = `text-2xl font-bold mb-2 ${data.scenario_color}`;
+                
+                // Advice
+                document.getElementById('market-advice').innerText = data.scenario_advice;
+                
+                // Trade conditions
+                document.getElementById('longs-status').innerText = data.longs_status;
+                document.getElementById('shorts-status').innerText = data.shorts_status;
+                
+                // Last update
+                const ageMin = data.age_minutes;
+                const ageText = ageMin < 1 ? 'Just now' : `${ageMin.toFixed(0)}m ago`;
+                document.getElementById('market-last-update').innerText = `Updated: ${ageText}`;
+                
+                // Border color do card baseado no cenário
+                const marketCard = document.getElementById('market-card');
+                if (data.btcd_direction === 'LONG') {
+                    marketCard.style.borderLeftColor = '#ef4444'; // red
+                } else if (data.btcd_direction === 'SHORT') {
+                    marketCard.style.borderLeftColor = '#10b981'; // green
+                } else {
+                    marketCard.style.borderLeftColor = '#6b7280'; // gray
+                }
+                
+            } catch (e) {
+                console.error('Erro ao buscar market data:', e);
+            }
+        }
+
+        // VISION AI ANALYSIS
+        async function fetchVisionAnalysis() {
+            try {
+                const res = await fetch('/api/vision/analysis');
+                const data = await res.json();
+                
+                if (!data.analyses || data.analyses.length === 0) {
+                    document.getElementById('vision-grid').innerHTML = '<div class="text-center text-gray-600 col-span-4 py-8">No analyses yet</div>';
+                    return;
+                }
+                
+                const validCount = data.analyses.filter(a => a.ai_verdict === 'VALID').length;
+                const invalidCount = data.analyses.filter(a => a.ai_verdict === 'INVALID').length;
+                
+                document.getElementById('vision-count').innerText = `${data.analyses.length} Analyzed`;
+                document.getElementById('vision-valid-count').innerText = `✅ ${validCount} Valid`;
+                document.getElementById('vision-invalid-count').innerText = `❌ ${invalidCount} Invalid`;
+                
+                const grid = document.getElementById('vision-grid');
+                grid.innerHTML = data.analyses.map(a => {
+                    const isValid = a.ai_verdict === 'VALID';
+                    const borderColor = isValid ? 'border-green-500' : 'border-red-500/50';
+                    const verdictBg = isValid ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400';
+                    const confPct = ((a.ai_confidence || 0) * 100).toFixed(0);
+                    const confBar = isValid ? 'bg-green-500' : 'bg-red-500';
+                    const dirColor = a.direction === 'SHORT' ? 'text-red-400' : 'text-green-400';
+                    
+                    return `
+                    <div class="bg-[#0f172a] border ${borderColor} rounded-lg overflow-hidden hover:scale-[1.02] transition">
+                        ${a.image_url ? `<img src="${a.image_url}" alt="${a.symbol}" class="w-full h-36 object-cover" loading="lazy">` : '<div class="w-full h-36 bg-gray-800 flex items-center justify-center text-gray-600">No Image</div>'}
+                        <div class="p-3">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-white text-sm">${a.symbol}</span>
+                                <span class="${dirColor} text-xs font-bold">${a.direction || ''}</span>
+                            </div>
+                            <div class="text-xs text-gray-400 mb-2">${a.pattern_detected || ''}</div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs px-2 py-0.5 rounded ${verdictBg} font-bold">${a.ai_verdict}</span>
+                                <span class="text-xs text-gray-400">${confPct}% conf</span>
+                            </div>
+                            <div class="w-full bg-gray-800 rounded-full h-1 mb-2">
+                                <div class="${confBar} h-1 rounded-full" style="width: ${confPct}%"></div>
+                            </div>
+                            <div class="text-[10px] text-gray-500 leading-tight">${a.ai_reasoning || ''}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+            } catch(e) {
+                console.error('Vision analysis error:', e);
+            }
+        }
+
+        // VISION AI POST-ENTRY ALERTS
+        async function fetchVisionAlerts() {
+            try {
+                const res = await fetch('/api/vision/alerts');
+                const data = await res.json();
+                const div = document.getElementById('vision-alerts');
+                if (data.alerts && data.alerts.length > 0) {
+                    div.innerHTML = data.alerts.map(a => {
+                        let color = 'text-gray-400';
+                        if (a.includes('API FAILURE') || a.includes('🚨')) color = 'text-red-400 font-bold';
+                        else if (a.includes('INVALID')) color = 'text-yellow-400';
+                        else if (a.includes('VALID')) color = 'text-green-400';
+                        return `<div class="${color} hover:bg-white/5 px-1">${a}</div>`;
+                    }).join('');
+                    div.scrollTop = div.scrollHeight;
+                }
+            } catch(e) { console.error('Vision alerts error:', e); }
+        }
+
+        setInterval(fetchVisionAlerts, 5000);
+        fetchVisionAlerts();
+
+        setInterval(updateData, 3000); // Update a cada 3s
+        setInterval(fetchMarket, 5000); // Update market a cada 5s
+        setInterval(fetchVisionAnalysis, 10000); // Update vision a cada 10s
+        updateData();
+        fetchMarket();
+        fetchVisionAnalysis();
+    </script>
+    </div>
+</body>
+</html>
