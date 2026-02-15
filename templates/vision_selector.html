@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision AI Selector - Severino Sniper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0b0f19; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; }
+        .card { background-color: #151b2b; border: 1px solid #2d3748; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 157, 0.2); }
+        .back-button { transition: all 0.3s ease; }
+        .back-button:hover { transform: translateX(-5px); background: rgba(0, 255, 157, 0.1); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+        .analysis-card { transition: all 0.3s ease; cursor: pointer; }
+        .analysis-card:hover { transform: scale(1.02); border-color: #7c3aed; }
+        .filter-button { transition: all 0.3s ease; }
+        .filter-button.active { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { max-width: 90vw; max-height: 90vh; overflow-y: auto; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/dashboard" class="back-button flex items-center space-x-2 px-4 py-2 rounded-lg border border-green-400/30 text-green-400 hover:border-green-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span class="font-semibold">Back to Dashboard</span>
+            </a>
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center font-bold text-white text-sm">👁</div>
+                <span class="text-lg font-bold">Vision AI <span class="text-purple-400">Gallery</span></span>
+            </div>
+            <div class="text-sm text-gray-500" id="analysis-count">Loading...</div>
+        </div>
+    </nav>
+
+    <div class="pt-24 p-6">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+            <h1 class="text-2xl font-bold tracking-wider text-white">VISION AI <span class="text-purple-500">ANALYSIS</span> GALLERY</h1>
+        </div>
+        <div class="text-sm text-gray-500" id="clock">00:00:00 UTC</div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold">🔍 Filter Analyses</h2>
+            <button onclick="clearFilters()" class="text-sm px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
+                Clear All
+            </button>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <button onclick="filterBy('all')" class="filter-button px-4 py-2 rounded-lg font-semibold transition bg-purple-600 text-white active" data-filter="all">
+                All
+            </button>
+            <button onclick="filterBy('VALID')" class="filter-button px-4 py-2 rounded-lg font-semibold transition bg-gray-700 text-gray-300" data-filter="VALID">
+                ✅ Valid
+            </button>
+            <button onclick="filterBy('INVALID')" class="filter-button px-4 py-2 rounded-lg font-semibold transition bg-gray-700 text-gray-300" data-filter="INVALID">
+                ❌ Invalid
+            </button>
+            <button onclick="filterBy('LONG')" class="filter-button px-4 py-2 rounded-lg font-semibold transition bg-gray-700 text-gray-300" data-filter="LONG">
+                📈 LONG
+            </button>
+            <button onclick="filterBy('SHORT')" class="filter-button px-4 py-2 rounded-lg font-semibold transition bg-gray-700 text-gray-300" data-filter="SHORT">
+                📉 SHORT
+            </button>
+        </div>
+    </div>
+
+    <!-- ANALYSIS GRID -->
+    <div class="card">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <span>🎯</span> Complete Analysis Archive
+            </h2>
+            <button onclick="refreshData()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-semibold transition">
+                🔄 Refresh
+            </button>
+        </div>
+        
+        <div id="analyses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="text-center text-gray-600 col-span-full py-8">Loading analyses...</div>
+        </div>
+        
+        <!-- Load More Button -->
+        <div class="text-center mt-8">
+            <button id="load-more-btn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition hidden">
+                Load More Analyses
+            </button>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="card max-w-4xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold" id="modal-title">Analysis Details</h2>
+                    <button onclick="closeModal()" class="text-2xl text-gray-400 hover:text-white transition">×</button>
+                </div>
+                <div id="modal-content">
+                    <!-- Content loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loading" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="card text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-400 mx-auto mb-4"></div>
+            <p class="text-lg font-semibold">Loading Vision AI Gallery...</p>
+        </div>
+    </div>
+
+    <script>
+        let allAnalyses = [];
+        let displayedAnalyses = [];
+        let currentFilter = 'all';
+        let loadingEl = document.getElementById('loading');
+
+        // CLOCK
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+        }, 1000);
+
+        function getVerdictBadge(verdict) {
+            return verdict === 'VALID' ?
+                '<span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-bold">✅ VALID</span>' :
+                '<span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-bold">❌ INVALID</span>';
+        }
+
+        function getDirectionBadge(direction) {
+            if (!direction) return '<span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded text-xs">N/A</span>';
+            return direction === 'LONG' ?
+                '<span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-bold">📈 LONG</span>' :
+                '<span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-bold">📉 SHORT</span>';
+        }
+
+        function filterBy(filter) {
+            currentFilter = filter;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                if (btn.dataset.filter === filter) {
+                    btn.className = 'filter-button px-4 py-2 rounded-lg font-semibold transition bg-purple-600 text-white active';
+                } else {
+                    btn.className = 'filter-button px-4 py-2 rounded-lg font-semibold transition bg-gray-700 text-gray-300';
+                }
+            });
+
+            // Filter analyses
+            if (filter === 'all') {
+                displayedAnalyses = [...allAnalyses];
+            } else {
+                displayedAnalyses = allAnalyses.filter(a => {
+                    if (filter === 'VALID' || filter === 'INVALID') {
+                        return a.ai_verdict === filter;
+                    }
+                    if (filter === 'LONG' || filter === 'SHORT') {
+                        return a.direction === filter;
+                    }
+                    return true;
+                });
+            }
+
+            renderAnalyses();
+        }
+
+        function clearFilters() {
+            filterBy('all');
+        }
+
+        function renderAnalyses() {
+            const grid = document.getElementById('analyses-grid');
+            
+            if (displayedAnalyses.length === 0) {
+                grid.innerHTML = '<div class="text-center text-gray-600 col-span-full py-8">No analyses found for current filter</div>';
+                return;
+            }
+
+            grid.innerHTML = displayedAnalyses.map(analysis => {
+                const isValid = analysis.ai_verdict === 'VALID';
+                const borderColor = isValid ? 'border-green-500/50' : 'border-red-500/50';
+                const confidencePercent = ((analysis.ai_confidence || 0) * 100).toFixed(0);
+                const confidenceBar = isValid ? 'bg-green-500' : 'bg-red-500';
+
+                return `
+                <div class="analysis-card bg-gray-900/30 border ${borderColor} rounded-lg overflow-hidden hover:border-purple-500 transition" 
+                     onclick="showDetail(${analysis.id})">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="font-bold text-white text-lg">${analysis.symbol}</h3>
+                                <div class="text-xs text-gray-400 mt-1">${analysis.timeframe} • ${analysis.date_str}</div>
+                            </div>
+                            ${getDirectionBadge(analysis.direction)}
+                        </div>
+                        
+                        <div class="text-sm text-gray-300 mb-3">
+                            ${analysis.pattern_detected || 'Pattern not detected'}
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            ${getVerdictBadge(analysis.ai_verdict)}
+                            <div class="text-xs text-gray-400">
+                                ${confidencePercent}% conf
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-gray-800 rounded-full h-2 mb-2">
+                            <div class="${confidenceBar} h-2 rounded-full transition-all duration-500" 
+                                 style="width: ${confidencePercent}%"></div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500 leading-tight line-clamp-2">
+                            ${(analysis.ai_reasoning || 'No reasoning available').substring(0, 80)}${analysis.ai_reasoning && analysis.ai_reasoning.length > 80 ? '...' : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function showDetail(analysisId) {
+            try {
+                const res = await fetch(`/api/vision/detail/${analysisId}`);
+                const analysis = await res.json();
+                
+                if (analysis.error) {
+                    throw new Error(analysis.error);
+                }
+
+                const isValid = analysis.ai_verdict === 'VALID';
+                const confidencePercent = ((analysis.ai_confidence || 0) * 100).toFixed(0);
+
+                document.getElementById('modal-title').innerHTML = `
+                    ${analysis.symbol} • ${analysis.pattern_detected || 'N/A'} 
+                    ${getVerdictBadge(analysis.ai_verdict)}
+                `;
+
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Image -->
+                        <div class="text-center">
+                            ${analysis.image_url ? 
+                                `<img src="${analysis.image_url}" alt="${analysis.symbol}" class="w-full max-w-md mx-auto rounded-lg border border-gray-700 mb-4">` :
+                                '<div class="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center text-gray-600 mb-4">No Image Available</div>'
+                            }
+                            <div class="text-sm text-gray-500">Analysis ID: #${analysis.id}</div>
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-sm text-gray-400 uppercase tracking-wide">Symbol</div>
+                                    <div class="text-xl font-bold text-white">${analysis.symbol}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-400 uppercase tracking-wide">Timeframe</div>
+                                    <div class="text-xl font-bold text-white">${analysis.timeframe || 'N/A'}</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="text-sm text-gray-400 uppercase tracking-wide">Pattern Detected</div>
+                                <div class="text-lg font-semibold text-white">${analysis.pattern_detected || 'None'}</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-sm text-gray-400 uppercase tracking-wide">Direction</div>
+                                    <div>${getDirectionBadge(analysis.direction)}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-400 uppercase tracking-wide">AI Confidence</div>
+                                    <div class="text-lg font-bold ${isValid ? 'text-green-400' : 'text-red-400'}">${confidencePercent}%</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="text-sm text-gray-400 uppercase tracking-wide mb-2">AI Reasoning</div>
+                                <div class="bg-gray-900/50 p-3 rounded-lg text-sm leading-relaxed">
+                                    ${analysis.ai_reasoning || 'No detailed reasoning provided by the AI.'}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="text-sm text-gray-400 uppercase tracking-wide">Analysis Date</div>
+                                <div class="text-white">${analysis.formatted_date || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('detail-modal').classList.add('show');
+                
+            } catch (error) {
+                alert('Error loading analysis details: ' + error.message);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+
+        // Close modal on outside click
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/vision/list');
+                const data = await res.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                allAnalyses = data.analyses || [];
+                displayedAnalyses = [...allAnalyses];
+                
+                document.getElementById('analysis-count').innerText = `${allAnalyses.length} analyses`;
+                
+                renderAnalyses();
+                loadingEl.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading analyses:', error);
+                loadingEl.innerHTML = `
+                    <div class="card text-center">
+                        <div class="text-red-400 text-4xl mb-4">⚠️</div>
+                        <p class="text-lg font-semibold text-red-400">Error Loading Gallery</p>
+                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                        <button onclick="refreshData()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function refreshData() {
+            loadingEl.style.display = 'flex';
+            loadData();
+        }
+
+        // Load initial data
+        loadData();
+    </script>
+    </div>
+</body>
+</html>

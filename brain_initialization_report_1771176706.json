@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-02-15T17:31:46.235971",
+  "initialization_duration": 2.6952672004699707,
+  "system_status": {
+    "performance_tracker": "ACTIVE",
+    "continuous_learning": "ACTIVE",
+    "maintenance": "ACTIVE"
+  },
+  "performance_summary": {
+    "general": {
+      "total_feedback": 0,
+      "success_rate": 0.0,
+      "avg_pnl": 0,
+      "total_pnl": 0,
+      "avg_performance_score": 0
+    },
+    "top_patterns": []
+  },
+  "training_status": {
+    "is_training": false,
+    "current_model_version": "v1.0.0",
+    "patterns_count": 9,
+    "models_dir": "brain_models/",
+    "batch_size": 50
+  },
+  "recommendations": [
+    "Colete mais dados de feedback para melhorar a precisão do modelo",
+    "Taxa de sucesso baixa - considere revisar estratégias de entrada"
+  ]
+}

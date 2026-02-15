@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PnL Details - Severino Sniper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0b0f19; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; }
+        .card { background-color: #151b2b; border: 1px solid #2d3748; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .glass { background: rgba(21, 27, 43, 0.7); backdrop-filter: blur(10px); }
+        .text-neon-green { color: #00ff9d; text-shadow: 0 0 10px rgba(0, 255, 157, 0.5); }
+        .text-neon-red { color: #ff0055; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
+        .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 157, 0.2); }
+        .back-button { transition: all 0.3s ease; }
+        .back-button:hover { transform: translateX(-5px); background: rgba(0, 255, 157, 0.1); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/dashboard" class="back-button flex items-center space-x-2 px-4 py-2 rounded-lg border border-green-400/30 text-green-400 hover:border-green-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span class="font-semibold">Back to Dashboard</span>
+            </a>
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center font-bold text-white text-sm">$</div>
+                <span class="text-lg font-bold">PnL <span class="text-green-400">Analytics</span></span>
+            </div>
+            <div class="text-sm text-gray-500" id="last-update">Loading...</div>
+        </div>
+    </nav>
+
+    <div class="pt-24 p-6">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <h1 class="text-2xl font-bold tracking-wider text-white">PnL <span class="text-blue-500">DETAILED</span> ANALYSIS</h1>
+        </div>
+        <div class="text-sm text-gray-500" id="clock">00:00:00 UTC</div>
+    </div>
+
+    <!-- PNL SUMMARY CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card border-t-4 border-blue-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Unrealized PnL</h3>
+            <p class="text-3xl font-bold mt-2" id="unrealized-pnl">$0.00</p>
+            <p class="text-xs text-gray-500 mt-1">Open Positions</p>
+        </div>
+        <div class="card border-t-4 border-green-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Today PnL</h3>
+            <p class="text-3xl font-bold mt-2" id="today-pnl">$0.00</p>
+            <p class="text-xs text-gray-500 mt-1"><span id="today-trades">0</span> trades</p>
+        </div>
+        <div class="card border-t-4 border-purple-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Week PnL (7d)</h3>
+            <p class="text-3xl font-bold mt-2" id="week-pnl">$0.00</p>
+            <p class="text-xs text-gray-500 mt-1"><span id="week-trades">0</span> trades</p>
+        </div>
+        <div class="card border-t-4 border-yellow-500 hover:scale-105 transition transform duration-300">
+            <h3 class="text-gray-400 text-xs uppercase tracking-widest">Month PnL (30d)</h3>
+            <p class="text-3xl font-bold mt-2" id="month-pnl">$0.00</p>
+            <p class="text-xs text-gray-500 mt-1"><span id="month-trades">0</span> trades</p>
+        </div>
+    </div>
+
+    <!-- TOTAL PNL CARD -->
+    <div class="card mb-8 border-l-4 border-orange-500">
+        <div class="text-center">
+            <h2 class="text-lg font-bold text-gray-400 uppercase tracking-wide mb-4">Total Combined PnL</h2>
+            <div class="text-6xl font-black mb-4" id="total-pnl">$0.00</div>
+            <div class="text-sm text-gray-500">Unrealized + Realized (30 days)</div>
+        </div>
+    </div>
+
+    <!-- PNL BREAKDOWN TABLE -->
+    <div class="card">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <span>📊</span> PnL Breakdown by Period
+            </h2>
+            <button onclick="refreshData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold transition">
+                🔄 Refresh
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-700">
+                        <th class="text-left py-3 px-4 font-bold text-gray-400 uppercase tracking-wide">Period</th>
+                        <th class="text-right py-3 px-4 font-bold text-gray-400 uppercase tracking-wide">PnL</th>
+                        <th class="text-right py-3 px-4 font-bold text-gray-400 uppercase tracking-wide">Trades</th>
+                        <th class="text-right py-3 px-4 font-bold text-gray-400 uppercase tracking-wide">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="pnl-breakdown-table">
+                    <tr><td colspan="4" class="text-center py-8 text-gray-600">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loading" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="card text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-green-400 mx-auto mb-4"></div>
+            <p class="text-lg font-semibold">Loading PnL Analytics...</p>
+        </div>
+    </div>
+
+    <script>
+        // CLOCK
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+        }, 1000);
+
+        let loadingEl = document.getElementById('loading');
+
+        function formatPnL(value) {
+            const formatted = (value >= 0 ? '+' : '') + '$' + Math.abs(value).toFixed(2);
+            return value >= 0 ? 
+                `<span class="text-neon-green">${formatted}</span>` :
+                `<span class="text-neon-red">${formatted}</span>`;
+        }
+
+        function getStatusBadge(pnl) {
+            if (pnl > 0) return '<span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-bold">PROFIT</span>';
+            if (pnl < 0) return '<span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-bold">LOSS</span>';
+            return '<span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded text-xs font-bold">NEUTRAL</span>';
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/pnl-detailed');
+                const data = await res.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Update cards
+                document.getElementById('unrealized-pnl').innerHTML = formatPnL(data.unrealized_pnl);
+                document.getElementById('today-pnl').innerHTML = formatPnL(data.today_pnl);
+                document.getElementById('week-pnl').innerHTML = formatPnL(data.week_pnl);
+                document.getElementById('month-pnl').innerHTML = formatPnL(data.month_pnl);
+                document.getElementById('total-pnl').innerHTML = formatPnL(data.total_pnl);
+
+                // Update trade counts
+                document.getElementById('today-trades').innerText = data.today_trades || 0;
+                document.getElementById('week-trades').innerText = data.week_trades || 0;
+                document.getElementById('month-trades').innerText = data.month_trades || 0;
+
+                // Update table
+                const tableBody = document.getElementById('pnl-breakdown-table');
+                tableBody.innerHTML = `
+                    <tr class="border-b border-gray-800 hover:bg-gray-800/30">
+                        <td class="py-4 px-4 font-semibold">Unrealized (Open)</td>
+                        <td class="py-4 px-4 text-right font-bold">${formatPnL(data.unrealized_pnl)}</td>
+                        <td class="py-4 px-4 text-right">-</td>
+                        <td class="py-4 px-4 text-right">${getStatusBadge(data.unrealized_pnl)}</td>
+                    </tr>
+                    <tr class="border-b border-gray-800 hover:bg-gray-800/30">
+                        <td class="py-4 px-4 font-semibold">Today (24h)</td>
+                        <td class="py-4 px-4 text-right font-bold">${formatPnL(data.today_pnl)}</td>
+                        <td class="py-4 px-4 text-right">${data.today_trades}</td>
+                        <td class="py-4 px-4 text-right">${getStatusBadge(data.today_pnl)}</td>
+                    </tr>
+                    <tr class="border-b border-gray-800 hover:bg-gray-800/30">
+                        <td class="py-4 px-4 font-semibold">This Week (7d)</td>
+                        <td class="py-4 px-4 text-right font-bold">${formatPnL(data.week_pnl)}</td>
+                        <td class="py-4 px-4 text-right">${data.week_trades}</td>
+                        <td class="py-4 px-4 text-right">${getStatusBadge(data.week_pnl)}</td>
+                    </tr>
+                    <tr class="border-b border-gray-800 hover:bg-gray-800/30">
+                        <td class="py-4 px-4 font-semibold">This Month (30d)</td>
+                        <td class="py-4 px-4 text-right font-bold">${formatPnL(data.month_pnl)}</td>
+                        <td class="py-4 px-4 text-right">${data.month_trades}</td>
+                        <td class="py-4 px-4 text-right">${getStatusBadge(data.month_pnl)}</td>
+                    </tr>
+                    <tr class="bg-gray-900/50 font-bold">
+                        <td class="py-4 px-4 text-orange-400">TOTAL COMBINED</td>
+                        <td class="py-4 px-4 text-right text-lg">${formatPnL(data.total_pnl)}</td>
+                        <td class="py-4 px-4 text-right">-</td>
+                        <td class="py-4 px-4 text-right">${getStatusBadge(data.total_pnl)}</td>
+                    </tr>
+                `;
+
+                // Update last update time
+                document.getElementById('last-update').innerText = `Updated: ${data.last_update || 'Just now'}`;
+                
+                loadingEl.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading PnL data:', error);
+                loadingEl.innerHTML = `
+                    <div class="card text-center">
+                        <div class="text-red-400 text-4xl mb-4">⚠️</div>
+                        <p class="text-lg font-semibold text-red-400">Error Loading Data</p>
+                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                        <button onclick="refreshData()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function refreshData() {
+            loadingEl.style.display = 'flex';
+            loadData();
+        }
+
+        // Auto refresh every 30 seconds
+        setInterval(loadData, 30000);
+        
+        // Load initial data
+        loadData();
+    </script>
+    </div>
+</body>
+</html>
