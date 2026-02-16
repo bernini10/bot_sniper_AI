@@ -1,11 +1,67 @@
-*.log
-*.db
-brain_images/
-__pycache__/
-venv/
+# Arquivos sensíveis - NUNCA subir para o repositório!
+secrets.json
+api_keys.json
+*.key
+*.pem
+*.cert
+*.p12
 .env
-segredos.json
-*.backup*
-*.old
-*.patch
-*.before_debug
+.env.local
+.env.*.local
+
+# Arquivos de configuração local
+config_futures_local.json
+config_mode_local.json
+
+# Arquivos de dados sensíveis
+btcd_data.json
+closed_pnl_cache.json
+smart_blacklist.json
+trades_history.json
+watchlist.json
+
+# Logs
+*.log
+logs/
+brain_logs/
+executor_*.log
+
+# Banco de dados
+sniper_brain.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Backups
+backup_*/
+backup_*.tar.gz
+
+# Arquivos temporários
+*.pyc
+__pycache__/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Arquivos de sistema
+venv/
+.env/
+.idea/
+.vscode/
+
+# Arquivos de teste temporários
+test_*.py
+debug_*.py
+*_test.sh
+*_flow.sh
+
+# Brain models (grandes)
+brain_models/
+*.pkl
+*.h5
+*.joblib
+
+# Imagens geradas
+brain_images/
+pattern_images/

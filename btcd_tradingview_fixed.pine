@@ -1,0 +1,70 @@
+//@version=5
+indicator("BTC.D Monitor - Severino Bot", overlay=false)
+
+// Buscar BTC.D no timeframe de 4h
+btcDom = request.security("CRYPTOCAP:BTC.D", "240", close)
+
+// Calcular SMA20 para determinar tendência
+sma20 = ta.sma(btcDom, 20)
+
+// Determinar direção
+direction = btcDom > sma20 ? "LONG" : "SHORT"
+
+// Calcular mudança percentual vs candle anterior
+change_pct = ((btcDom - btcDom[1]) / btcDom[1]) * 100
+
+// Plots para visualização
+plot(btcDom, title="BTC.D", color=color.orange, linewidth=2)
+plot(sma20, title="SMA20", color=color.blue, linewidth=1)
+
+// Colorir fundo baseado na direção
+bgcolor(direction == "LONG" ? color.new(color.red, 90) : color.new(color.green, 90))
+
+// ==== CORREÇÕES CRÍTICAS ====
+
+// 1. Criar string JSON corretamente formatada
+// IMPORTANTE: str.tostring() com formato '#.##' para 2 casas decimais
+btcDomFormatted = str.tostring(btcDom, "#.##")
+changePctFormatted = str.tostring(change_pct, "#.##")
+
+// 2. Construir mensagem JSON correta
+jsonMessage = '{"btc_d_value": ' + btcDomFormatted + ', "direction": "' + direction + '", "change_pct": ' + changePctFormatted + '}'
+
+// 3. Alert a cada candle fechado (4h) com mensagem JSON
+if barstate.isconfirmed
+    // Usar alert() com a mensagem JSON
+    alert(
+         message = jsonMessage,  // AQUI ESTÁ O JSON CORRETO
+         freq = alert.freq_once_per_bar
+    )
+
+// 4. Mostrar valores no label para debug
+var label debugLabel = na
+if barstate.islast
+    label.delete(debugLabel)
+    debugLabel := label.new(
+         x = bar_index, y = btcDom,
+         text = "BTC.D: " + btcDomFormatted + "%\n" +
+                "Direction: " + direction + "\n" +
+                "Change: " + changePctFormatted + "%\n" +
+                "JSON: " + jsonMessage,
+         color = color.black,
+         textcolor = color.white,
+         style = label.style_label_left,
+         size = size.small
+    )
+
+// ==== INSTRUÇÕES DE CONFIGURAÇÃO ====
+// 
+// 1. NO ALERTA DO TRADINGVIEW:
+//    - URL: http://147.182.145.169:5555/webhook/btcd
+//    - Mensagem: {{alert.message}}  (NÃO MUDAR!)
+//    - Frequência: Once per bar close
+//
+// 2. TESTE:
+//    - Clique em "Send Test Alert" para verificar
+//    - Verifique se chega no servidor webhook
+//
+// 3. VERIFICAÇÃO:
+//    - O JSON deve chegar assim: {"btc_d_value": 59.12, "direction": "SHORT", "change_pct": -0.50}
+//

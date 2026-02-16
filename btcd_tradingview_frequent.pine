@@ -1,0 +1,115 @@
+//@version=5
+indicator("BTC.D Monitor - Atualização Frequente", overlay=false)
+
+// ==== CONFIGURAÇÃO ====
+UPDATE_FREQUENCY = input.string("1min", "Frequência", options=["1min", "5min", "15min", "30min", "1h"])
+SEND_ON_CHANGE_ONLY = input.bool(true, "Enviar apenas se mudar >0.3%")
+
+// Buscar BTC.D no timeframe de 4h (análise)
+btcDom_4h = request.security("CRYPTOCAP:BTC.D", "240", close)
+
+// Também buscar em timeframe menor para detecção mais rápida
+btcDom_1h = request.security("CRYPTOCAP:BTC.D", "60", close)
+btcDom_15m = request.security("CRYPTOCAP:BTC.D", "15", close)
+
+// Usar o mais recente para alertas
+btcDom = btcDom_15m  // Mais sensível a mudanças rápidas
+
+// Calcular SMA20 para determinar tendência
+sma20 = ta.sma(btcDom, 20)
+
+// Determinar direção
+direction = btcDom > sma20 ? "LONG" : "SHORT"
+
+// Calcular mudança percentual vs valor anterior (15min atrás)
+change_pct = ((btcDom - btcDom[1]) / btcDom[1]) * 100
+
+// Mudança vs 4h atrás (para contexto)
+change_vs_4h = ((btcDom - btcDom_4h) / btcDom_4h) * 100
+
+// ==== LÓGICA DE ALERTA INTELIGENTE ====
+
+// 1. Sempre enviar no fechamento do candle de 4h (para consistência)
+is_4h_close = timeframe.isintraday ? (timeframe.multiplier == 240 and barstate.isconfirmed) : false
+
+// 2. Enviar se mudança significativa (>0.3%)
+significant_change = math.abs(change_pct) >= 0.3
+
+// 3. Enviar periodicamente baseado na frequência escolhida
+var int last_alert_bar = na
+should_send_periodic = false
+
+if UPDATE_FREQUENCY == "1min" and barstate.isconfirmed
+    should_send_periodic := true
+else if UPDATE_FREQUENCY == "5min" and timeframe.multiplier == 5 and barstate.isconfirmed
+    should_send_periodic := true
+else if UPDATE_FREQUENCY == "15min" and timeframe.multiplier == 15 and barstate.isconfirmed
+    should_send_periodic := true
+else if UPDATE_FREQUENCY == "30min" and timeframe.multiplier == 30 and barstate.isconfirmed
+    should_send_periodic := true
+else if UPDATE_FREQUENCY == "1h" and timeframe.multiplier == 60 and barstate.isconfirmed
+    should_send_periodic := true
+
+// Decisão final: quando enviar alerta?
+should_alert = is_4h_close or 
+               (SEND_ON_CHANGE_ONLY and significant_change) or 
+               (not SEND_ON_CHANGE_ONLY and should_send_periodic)
+
+// ==== FORMATAR MENSAGEM JSON ====
+btcDomStr = str.tostring(btcDom, "#.##")
+changeStr = str.tostring(change_pct, "#.##")
+change4hStr = str.tostring(change_vs_4h, "#.##")
+
+// Mensagem JSON completa
+jsonMessage = '{"btc_d_value": ' + btcDomStr + 
+              ', "direction": "' + direction + 
+              '", "change_pct": ' + changeStr + 
+              ', "change_vs_4h": ' + change4hStr + 
+              ', "timestamp": ' + str.tostring(time) + '}'
+
+// ==== DISPARAR ALERTA ====
+if should_alert
+    alert(jsonMessage, alert.freq_once_per_bar_close)
+
+// ==== VISUALIZAÇÃO NO GRÁFICO ====
+plot(btcDom, title="BTC.D (15m)", color=color.orange, linewidth=2)
+plot(btcDom_4h, title="BTC.D (4h)", color=color.purple, linewidth=1)
+plot(sma20, title="SMA20", color=color.blue, linewidth=1)
+
+// Colorir fundo baseado na direção
+bgcolor(direction == "LONG" ? color.new(color.red, 90) : color.new(color.green, 90))
+
+// Mostrar informações
+var label infoLabel = na
+if barstate.islast
+    label.delete(infoLabel)
+    infoLabel := label.new(
+        x = bar_index, y = btcDom,
+        text = "BTC.D: " + btcDomStr + "%\n" +
+               "Direção: " + direction + "\n" +
+               "Mudança (15m): " + changeStr + "%\n" +
+               "Mudança (4h): " + change4hStr + "%\n" +
+               "Próximo alerta: " + (SEND_ON_CHANGE_ONLY ? "Se mudar >0.3%" : UPDATE_FREQUENCY),
+        color = color.black,
+        textcolor = color.white,
+        style = label.style_label_left,
+        size = size.small
+    )
+
+// ==== INSTRUÇÕES ====
+//
+// CONFIGURAÇÃO NO TRADINGVIEW:
+// 1. Timeframe do gráfico: 15min (recomendado)
+// 2. No alerta:
+//    - URL: http://147.182.145.169/webhook/btcd
+//    - Mensagem: {{alert.message}}
+//    - Frequência: "Once per bar close" (do timeframe do gráfico)
+// 3. Parâmetros do indicador:
+//    - Frequência: "1min" para máximo atualização
+//    - "Enviar apenas se mudar": true para menos spam
+//
+// O SISTEMA VAI:
+// 1. Enviar a cada 1min (ou na frequência escolhida)
+// 2. Sempre enviar no fechamento de 4h
+// 3. Enviar imediatamente se mudança >0.3%
+// 4. Manter dados sempre atualizados!

@@ -72,22 +72,71 @@ def webhook_btcd():
             except:
                 pass
         
-        # Tentar 4: Parsear texto legado do TradingView (ex: "Cruzando 59,37% em BTC.D, 4h")
+        # Tentar 4: Parsear texto simples do TradingView
         if not data:
             try:
                 import re
-                raw_data = request.get_data(as_text=True)
-                # Extrair valor do BTC.D do texto
-                match = re.search(r'(\d+[.,]\d+)\s*%\s*em\s*BTC\.?D', raw_data, re.IGNORECASE)
-                if match:
-                    btcd_val = float(match.group(1).replace(',', '.'))
+                raw_data = request.get_data(as_text=True).strip()
+                
+                # DEBUG: Logar o que chegou
+                logger.info(f"🔍 Tentando parsear texto: '{raw_data[:100]}'")
+                
+                # Padrão 1: "BTC.D: 59.37%, Direction: LONG, Change: 0.50%"
+                match1 = re.search(r'BTC\.?D:\s*(\d+[.,]\d+)%?\s*,\s*Direction:\s*(\w+)\s*,\s*Change:\s*([+-]?\d+[.,]\d+)%', raw_data, re.IGNORECASE)
+                
+                # Padrão 2: "BTC.D 59.37 LONG 0.50%"
+                match2 = re.search(r'BTC\.?D\s*(\d+[.,]\d+)%?\s+(\w+)\s+([+-]?\d+[.,]\d+)%', raw_data, re.IGNORECASE)
+                
+                # Padrão 3: Apenas número (fallback)
+                match3 = re.search(r'(\d+[.,]\d+)%', raw_data)
+                
+                if match1:
+                    btcd_val = float(match1.group(1).replace(',', '.'))
+                    direction = match1.group(2).upper()
+                    change = float(match1.group(3).replace(',', '.'))
                     data = {
                         'btc_d_value': btcd_val,
-                        'direction': 'UNKNOWN',
+                        'direction': direction,
+                        'change_pct': change,
+                        '_parsed_from_text': True
+                    }
+                    logger.info(f"✅ Webhook parseado de texto (padrão 1): BTC.D={btcd_val}% ({direction}) change={change}%")
+                    
+                elif match2:
+                    btcd_val = float(match2.group(1).replace(',', '.'))
+                    direction = match2.group(2).upper()
+                    change = float(match2.group(3).replace(',', '.'))
+                    data = {
+                        'btc_d_value': btcd_val,
+                        'direction': direction,
+                        'change_pct': change,
+                        '_parsed_from_text': True
+                    }
+                    logger.info(f"✅ Webhook parseado de texto (padrão 2): BTC.D={btcd_val}% ({direction}) change={change}%")
+                    
+                elif match3:
+                    btcd_val = float(match3.group(1).replace(',', '.'))
+                    data = {
+                        'btc_d_value': btcd_val,
+                        'direction': 'NEUTRAL',
                         'change_pct': 0,
                         '_parsed_from_text': True
                     }
-                    logger.warning(f"⚠️ Webhook recebido como texto - parseado: BTC.D={btcd_val}%. Corrija o alerta no TV para usar {{{{alert.message}}}}")
+                    logger.warning(f"⚠️ Webhook parseado apenas valor: BTC.D={btcd_val}% (direção desconhecida)")
+                    
+                else:
+                    # Logar o que veio para debug
+                    logger.warning(f"⚠️ Texto não reconhecido: '{raw_data[:100]}'")
+                    # Tentar como fallback: se parece JSON mas com problemas
+                    if '{' in raw_data and '}' in raw_data:
+                        try:
+                            # Tentar corrigir JSON quebrado
+                            fixed = raw_data.replace("'", '"')
+                            data = json.loads(fixed)
+                            logger.info(f"✅ JSON corrigido: {data}")
+                        except:
+                            pass
+                    
             except Exception as e:
                 logger.error(f"Erro ao parsear texto: {e}")
 
@@ -101,6 +150,16 @@ def webhook_btcd():
         if 'btc_d_value' not in data:
             logger.error(f"Dados inválidos recebidos: {data}")
             return jsonify({"error": "Missing btc_d_value"}), 400
+        
+        # Converter strings para números se necessário
+        try:
+            if isinstance(data['btc_d_value'], str):
+                data['btc_d_value'] = float(data['btc_d_value'].replace(',', '.'))
+            if isinstance(data.get('change_pct', 0), str):
+                data['change_pct'] = float(data['change_pct'].replace(',', '.'))
+        except ValueError as e:
+            logger.error(f"Erro ao converter valores: {e}")
+            return jsonify({"error": f"Invalid number format: {e}"}), 400
         
         # Adicionar timestamp
         data['timestamp'] = time.time()

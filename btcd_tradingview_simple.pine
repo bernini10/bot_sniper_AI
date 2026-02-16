@@ -1,0 +1,43 @@
+//@version=5
+indicator("BTC.D Monitor SIMPLES - Severino Bot", overlay=false)
+
+// Buscar BTC.D no timeframe de 4h
+btcDom = request.security("CRYPTOCAP:BTC.D", "240", close)
+
+// Calcular SMA20 para determinar tendência
+sma20 = ta.sma(btcDom, 20)
+
+// Determinar direção
+direction = btcDom > sma20 ? "LONG" : "SHORT"
+
+// Calcular mudança percentual vs candle anterior
+change_pct = ((btcDom - btcDom[1]) / btcDom[1]) * 100
+
+// ==== VERSÃO SIMPLES E GARANTIDA ====
+// TradingView tem problemas com str.tostring() em alerts
+// Vamos usar uma abordagem mais simples
+
+// Alert a cada candle fechado (4h) - FORMATO SIMPLES
+if barstate.isconfirmed
+    // Formato 1: Texto simples que o webhook server consegue parsear
+    alert_message = "BTC.D: " + str.tostring(btcDom, "#.##") + "%, Direction: " + direction + ", Change: " + str.tostring(change_pct, "#.##") + "%"
+    
+    // OU Formato 2: JSON manual (mais seguro)
+    // alert_message = "{\"btc_d_value\": " + str.tostring(btcDom, "#.##") + ", \"direction\": \"" + direction + "\", \"change_pct\": " + str.tostring(change_pct, "#.##") + "}"
+    
+    alert(alert_message, alert.freq_once_per_bar)
+
+// ==== INSTRUÇÕES ====
+//
+// 1. NO TRADINGVIEW:
+//    - URL: http://147.182.145.169/webhook/btcd
+//    - Mensagem: {{alert.message}}
+//    - Frequência: Once per bar close
+//
+// 2. NOSSO WEBHOOK SERVER:
+//    - Aceita tanto JSON quanto texto simples
+//    - Parseia automaticamente
+//
+// 3. TESTE:
+//    - Clique "Send Test Alert"
+//    - Verifique logs
