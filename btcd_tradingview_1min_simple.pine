@@ -1,0 +1,36 @@
+//@version=5
+indicator("BTC.D 1min - SIMPLE & WORKING", overlay=false)
+
+// DADOS BTC.D EM 1 MINUTO
+btcDom = request.security("CRYPTOCAP:BTC.D", "1", close)
+sma20 = ta.sma(btcDom, 20)
+direction = btcDom > sma20 ? "LONG" : "SHORT"
+change_pct = ((btcDom - btcDom[1]) / btcDom[1]) * 100
+
+// SEMPRE ALERTA NO FECHAMENTO DO CANDLE 1min
+should_alert = barstate.isconfirmed
+
+// FORMATAR JSON (números sem aspas!)
+btcDomStr = str.tostring(btcDom, "#.##")
+changeStr = str.tostring(change_pct, "#.##")
+jsonMessage = '{"btc_d_value": ' + btcDomStr + ', "direction": "' + direction + '", "change_pct": ' + changeStr + '}'
+
+// ALERTA QUE FUNCIONA EM 1min
+if should_alert
+    alert(jsonMessage, alert.freq_once_per_bar)
+
+// VISUAL
+plot(btcDom, "BTC.D", color.orange, 2)
+plot(sma20, "SMA20", color.blue, 1)
+
+// STATUS
+var label status = na
+if barstate.islast
+    label.delete(status)
+    status := label.new(bar_index, btcDom,
+        "✅ BTC.D 1min ALERT ACTIVE\n" +
+        "Value: " + btcDomStr + "% " + direction + "\n" +
+        "Change: " + changeStr + "%\n" +
+        "Next alert: " + (should_alert ? "NOW" : "in " + UPDATE_FREQ + "min"),
+        yloc=yloc.price, style=label.style_label_left,
+        color=color.green, textcolor=color.white)

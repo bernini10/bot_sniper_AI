@@ -1,0 +1,64 @@
+//@version=5
+indicator("BTC.D Monitor - 1min FIXED", overlay=false)
+
+// CONFIG - PARA 1 MINUTO FUNCIONAR
+UPDATE_FREQ = input.string("1", "Timeframe", options=["1", "5", "15", "30", "60"])
+SEND_ON_CHANGE = input.bool(false, "⚠️ Para 1min: DESATIVE 'Só se mudar >0.3%'") // DESATIVADO para 1min!
+
+// DADOS BTC.D - CORRIGIDO: usar string do timeframe
+btcDom = request.security("CRYPTOCAP:BTC.D", UPDATE_FREQ, close)
+sma20 = ta.sma(btcDom, 20)
+direction = btcDom > sma20 ? "LONG" : "SHORT"
+change_pct = ((btcDom - btcDom[1]) / btcDom[1]) * 100
+
+// LÓGICA ALERTA - SIMPLIFICADA PARA 1min
+is_candle_close = barstate.isconfirmed
+significant_change = math.abs(change_pct) >= 0.3
+
+// PARA 1 MINUTO: sempre alerta no candle close (ignora SEND_ON_CHANGE)
+should_alert = is_candle_close  // Sempre dispara no fechamento do candle 1min
+
+// FORMATAR JSON
+btcDomStr = str.tostring(btcDom, "#.##")
+changeStr = str.tostring(change_pct, "#.##")
+jsonMessage = '{"btc_d_value": ' + btcDomStr + ', "direction": "' + direction + '", "change_pct": ' + changeStr + '}'
+
+// DEBUG: Mostrar quando alerta dispararia
+plotshape(should_alert, "ALERT TRIGGER", shape.triangleup, location.bottom, color=color.green, size=size.small)
+plotchar(is_candle_close, "CANDLE CLOSE", "•", location.top, color=color.blue, size=size.tiny)
+
+// ALERTA - CORRIGIDO: freq_once_per_bar para 1min
+if should_alert
+    alert(jsonMessage, alert.freq_once_per_bar)  // MUDADO: once_per_bar (não _close)
+
+// PLOTS
+plot(btcDom, "BTC.D", color.orange, 2)
+plot(sma20, "SMA20", color.blue, 1)
+bgcolor(direction == "LONG" ? color.new(color.red, 90) : color.new(color.green, 90))
+
+// LABEL DE DEBUG
+var label infoLabel = na
+if barstate.islast
+    label.delete(infoLabel)
+    infoLabel := label.new(bar_index, btcDom, 
+         "BTC.D: " + btcDomStr + "% " + direction + 
+         "\nChange: " + changeStr + "%" +
+         "\nAlert: " + (should_alert ? "✅ YES" : "❌ NO") +
+         "\nTimeframe: " + UPDATE_FREQ + "min" +
+         "\nNext alert: " + (is_candle_close ? "NOW" : "waiting..."),
+         yloc=yloc.price, style=label.style_label_left, 
+         color=color.black, textcolor=color.white, size=size.small)
+
+// INSTRUÇÕES NO GRÁFICO
+var label instructions = na
+if barstate.islast
+    label.delete(instructions)
+    instructions := label.new(bar_index-10, btcDom*1.02,
+         "⚠️ CONFIGURAÇÃO DO ALERTA:\n" +
+         "1. Timeframe: " + UPDATE_FREQ + "min\n" +
+         "2. SEND_ON_CHANGE: " + (SEND_ON_CHANGE ? "ON" : "OFF") + "\n" +
+         "3. Alerta dispara a cada " + UPDATE_FREQ + "min\n" +
+         "4. URL: http://147.182.145.169/webhook/btcd\n" +
+         "5. Mensagem: {{alert.message}}",
+         yloc=yloc.price, style=label.style_label_right,
+         color=color.blue, textcolor=color.white, size=size.small)
