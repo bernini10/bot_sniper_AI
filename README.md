@@ -1,463 +1,297 @@
-# 🦅 Bot Sniper Bybit v2.4.0 (PROTOCOLO SEVERINO)
+# 🤖 bot_sniper_AI - Multi-Exchange AI Trading Bot with End-to-End Learning
 
-Um sistema de trading algorítmico de alta performance para o mercado de futuros de criptomoedas, desenhado com arquitetura modular, gestão de risco profissional, validação contínua de posições, análise de correlação BTC/Altcoins e **PROTOCOLO SEVERINO** completo para segurança máxima.
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/bernini10/bot_sniper_AI?style=social)](https://github.com/bernini10/bot_sniper_AI/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/bernini10/bot_sniper_AI?style=social)](https://github.com/bernini10/bot_sniper_AI/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/bernini10/bot_sniper_AI)](https://github.com/bernini10/bot_sniper_AI/issues)
+[![End-to-End Learning](https://img.shields.io/badge/ML-End--to--End-orange)](https://github.com/bernini10/bot_sniper_AI#-end-to-end-learning-system)
+[![Trading](https://img.shields.io/badge/Trading-Algorithmic-blueviolet)](https://github.com/bernini10/bot_sniper_AI#-algorithmic-trading)
+[![Bybit](https://img.shields.io/badge/Exchange-Bybit-yellow)](https://www.bybit.com)
+[![Multi-Exchange](https://img.shields.io/badge/Multi--Exchange-ready-success)](https://github.com/bernini10/bot_sniper_AI#-multi-exchange-support)
 
-## 🚀 Funcionalidades Principais
+> **🚀 Sistema completo de trading algorítmico com aprendizado end-to-end que aprende com trades REAIS, não simulações.**
 
-### Core System
-*   **Arquitetura "Hunter-Killer":**
-    *   `Scanner`: Varredura contínua de 30+ pares em múltiplos timeframes (15m, 1h, 4h).
-    *   `Monitor`: Vigia de preço "Just-in-Time". Dispara o trade apenas no rompimento exato (Tick-by-Tick).
-    *   `Executor`: Módulo "Fire-and-Forget". Entra a mercado, define Stop/Target na exchange e ativa proteção de lucro.
-*   **PROTOCOLO SEVERINO:** Validação BTC.D em tempo real + 5 cenários de mercado + monitoramento de mudança de cenário.
+## 📋 Table of Contents
+- [✨ Features](#-features)
+- [🧠 End-to-End Learning System](#-end-to-end-learning-system)
+- [🚀 Quick Start](#-quick-start)
+- [📊 Dashboard](#-dashboard)
+- [🏗️ Architecture](#️-architecture)
+- [🤝 Community & Contributing](#-community--contributing)
+- [💰 Sponsorship](#-sponsorship)
+- [📈 Performance](#-performance)
+- [📚 Documentation](#-documentation)
+- [📄 License](#-license)
 
-### 🛡️ Risk Management & Capital Defense
-*   **Gestão de Risco Profissional:**
-    *   Cálculo de lote baseado em risco fixo (ex: 1.5% da banca por trade).
-    *   Proteção contra alavancagem excessiva.
-*   **Break-Even Automático:** Move o Stop para a entrada ao atingir 50% do alvo.
-*   **Filtro de Tendência:** Só opera a favor da tendência macro do Bitcoin (SMA 200).
-*   **Filtro de Volume:** Ignora rompimentos sem volume relevante.
+## ✨ Features
 
-### ⚡ NEW in v2.4.0 - PROTOCOLO SEVERINO
+### 🤖 **AI-Powered Trading**
+- **🧠 End-to-End Learning**: Real-time learning from actual trades (not simulations)
+- **🔍 Pattern Recognition**: 11+ technical patterns across multiple timeframes
+- **📊 Market Context**: BTC.D validation with 5 market scenarios
+- **⚡ Real-time Execution**: Direct integration with Bybit API
 
-#### 🛡️ 1️⃣ PROTOCOLO SEVERINO - Validação BTC.D Avançada
-Sistema completo de validação de mercado baseado em BTC.D em tempo real com **5 cenários precisos**:
+### 🛡️ **Risk Management**
+- **🎯 Protocolo Severino**: Rigorous methodology for safe trading
+- **📉 Dynamic Stop-Loss**: Auto-adjusting based on market volatility
+- **📈 Position Sizing**: Intelligent capital allocation
+- **🔒 Post-Entry Validation**: Vision AI validation after entry
 
-| Cenário | BTC | BTC.D | Comportamento | Trades Permitidos | Regra Severino |
-|---------|-----|-------|---------------|-------------------|----------------|
-| 1 | ↗ | ↗ | Dinheiro indo pro BTC | ❌ LONGs, ✅ SHORTs | EVITAR LONGs em alts |
-| 2 | ↘ | ↗ | PÂNICO nas alts | ❌ LONGs, ✅ SHORTs | SHORTs favorecidos |
-| 3 | ↗ | ↘ | ALT SEASON 🚀 | ✅ LONGs, ❌ SHORTs | MELHOR para LONGs |
-| 4 | ↘ | ↘ | Alts segurando | ✅ LONGs, ✅ SHORTs | Permite ambos com cautela |
-| 5 | NEUTRO | NEUTRO | Mercado lateral | ✅ LONGs, ✅ SHORTs | Permite ambos |
+### 🔧 **Technical Excellence**
+- **🐍 Python 3.8+**: Modern, maintainable codebase
+- **📁 Modular Architecture**: Easy to extend and customize
+- **📊 Real-time Dashboard**: Live monitoring and analytics
+- **🔌 Multi-Exchange Ready**: Architecture supports multiple exchanges
 
-**Funcionalidades:**
-*   **Validação pré-trade:** Bloqueia trades em cenário desfavorável
-*   **Monitoramento contínuo:** Fecha trades se cenário mudar
-*   **Webhook TradingView:** Dados em tempo real (15min + se mudar >0.3%)
-*   **Fallback proxy:** Funciona mesmo se webhook falhar
+## 🧠 End-to-End Learning System
 
-📄 **Documentação:** [market_context_validator.py](market_context_validator.py)
+### 🎯 **What Makes Us Different?**
+Unlike most trading bots that use **simulated data**, bot_sniper_AI learns from **REAL trades**:
 
-#### 🧠 2️⃣ Sistema de Aprendizado End-to-End (Brain)
-Machine Learning com Q-Learning + Experience Replay:
-*   **48 estados** aprendidos automaticamente
-*   **Treinamento contínuo** a cada 60 minutos
-*   **Dashboard de monitoramento:** `brain_dashboard.py`
-*   **Integração completa:** Analisa padrões antes da execução
+```
+SCANNER → [Patterns] → MONITOR + BRAIN → [Decisions] → EXECUTOR → [Real Trades] → FEEDBACK REAL → BRAIN LEARNING
+```
 
-📄 **Documentação:** [brain_architecture.md](brain_architecture.md), [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
+### 📊 **3-Phase Learning System**
 
-#### 🐛 3️⃣ Correção Crítica - Bug de Direção
-**Problema resolvido:** Executor entrava LONG quando padrão era SHORT (DOT/USDT, SOL/USDT)
-**Solução:** Validação de consistência direção no executor V2
-**Impacto:** Elimina trades na direção errada
+#### **✅ Phase 1: Integration Restoration**
+- `bot_monitor_v2_with_brain.py` - Integrated monitor with learning system
+- Real-time brain integration with trading decisions
+- Unified scanner → monitor → brain → executor pipeline
 
-📄 **Código corrigido:** [bot_executor.py](bot_executor.py)
+#### **✅ Phase 2: Real-Time Learning**
+- `realtime_feedback_collector.py` - Collects REAL feedback from Bybit API
+- Database automatically updated with `trade_result`, `reward`, `brain_decision`
+- Brain learns from actual wins/losses (not simulations)
 
-#### 🔄 4️⃣ Validação Pós-Entrada V2.3.1
-Aprimoramento do sistema com **monitoramento de cenário**:
-*   **Threshold aumentado:** 0.70 → 0.85
-*   **Confirmação dupla:** Exige 2 candles consecutivos INVALID para fechar
-*   **Tolerância a pullbacks:** Prompt ajustado para evitar saídas prematuras
-*   **+ Monitoramento BTC.D:** Fecha trade se cenário mudar contra posição
+#### **✅ Phase 3: Auto-Optimization**
+- `data_compactor.py` - Intelligent data compression preserving learning
+- Auto-adjusting weights and counter-weights
+- Continuous scanner feeding the model
 
-📄 **Documentação:** [post_entry_validator.py](post_entry_validator.py)
+### 🔬 **Technical Implementation**
+- **Q-Learning with Experience Replay**
+- **Neural Network**: 10 features → 64 → 64 → 3 actions (BUY/SELL/HOLD)
+- **Training**: Incremental every 30 minutes
+- **Memory**: 10,000 experiences (FIFO buffer)
+- **Features**: Pattern confidence, market context, historical success
 
-#### 📊 5️⃣ Dashboard Completo
-Interface web com todas métricas:
-*   ✅ Posições ativas e histórico
-*   ✅ **Cenário de mercado atual** (BTC.D + favorabilidade)
-*   ✅ Watchlist de padrões em formação
-*   ✅ **Status Brain Learning** (estados aprendidos, win rate)
-*   ✅ Performance e estatísticas
-*   ✅ **Verificação de saúde** do sistema
+## 🚀 Quick Start
 
-🔗 **Acesso:** `http://localhost:8080`
+### 📦 **Prerequisites**
+```bash
+Python 3.8+
+Bybit API Key (for real trading)
+Google Gemini API Key (for Vision AI)
+```
 
----
+### 🔧 **Installation**
+```bash
+# Clone repository
+git clone https://github.com/bernini10/bot_sniper_AI.git
+cd bot_sniper_AI
 
-## 🛠️ Arquitetura do Sistema - PROTOCOLO SEVERINO
+# Install dependencies
+pip install -r requirements.txt
 
-O sistema roda 5 processos concorrentes orquestrados pelo `bot_manager.py` com validações em cascata:
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Initialize brain system
+python3 setup_brain_system.py
+```
+
+### 🏃 **Running the System**
+```bash
+# Start complete end-to-end system
+./launch_end_to_end_system.sh
+
+# Or start components individually:
+# 1. Brain Learning Daemon
+python3 -c "from brain_integration import BrainIntegration; brain = BrainIntegration(); brain.initialize(); brain.continuous_learning(30)"
+
+# 2. Feedback Collector
+python3 realtime_feedback_collector.py
+
+# 3. Integrated Monitor
+python3 bot_monitor_v2_with_brain.py
+
+# 4. Dashboard
+python3 dashboard_server.py
+```
+
+## 📊 Dashboard
+
+Access the real-time dashboard at: `http://localhost:8080`
+
+### 📈 **Dashboard Features:**
+- **Real-time Positions**: Live tracking of open trades
+- **Performance Metrics**: Win rate, Sharpe ratio, P&L
+- **Brain Learning Stats**: Training progress, memory usage
+- **Market Context**: BTC.D dominance, market scenarios
+- **Pattern Watchlist**: Active patterns with confidence scores
+
+## 🏗️ Architecture
 
 ```mermaid
-graph TD
-    A[Scanner] -->|Detecta Padrões| B(Watchlist.json)
-    B -->|Lê Dados| C[Monitor]
-    C -->|Vigia Preço| D{Rompimento?}
-    D -- Sim --> E[Validação BTC.D]
-    E -->|Cenário Favorável?| F{Brain Analysis}
-    F -->|Aprova| G[Executor]
-    G -->|Valida Consistência| H{Direção Correta?}
-    H -->|Sim| I[Executa Trade]
-    I -->|Ordem API| J((Bybit Futures))
-    K[TradingView] -->|Webhook BTC.D<br/>15min + >0.3%| L[Webhook Server]
-    L -->|Atualiza| M[BTC.D Data]
-    M -->|Análise Cenário| E
-    N[Brain Trainer] -->|Aprende| O[Q-Learning Model]
-    O -->|Decisões| F
-    P[Post Entry Validator] -->|Monitora| I
-    P -->|Cenário Mudou?| Q{Fecha Trade}
-    R[Dashboard] -->|Monitora| S((Todos Processos))
+graph TB
+    subgraph "📡 Data Collection"
+        A[Market Scanner] --> B[Pattern Detection]
+        B --> C[Watchlist Management]
+    end
     
-    style E fill:#ff9999
-    style F fill:#99ff99
-    style H fill:#ffcc99
-    style Q fill:#ff6666
+    subgraph "🧠 AI Learning"
+        D[Brain Integration] --> E[Q-Learning Model]
+        E --> F[Real-time Decisions]
+        G[Feedback Collector] --> H[Bybit API Real Data]
+        H --> I[Database Updates]
+    end
+    
+    subgraph "⚡ Execution"
+        J[Integrated Monitor] --> K[Decision Engine]
+        K --> L[Bybit Executor]
+        L --> M[Real Trades]
+    end
+    
+    subgraph "🔧 Optimization"
+        N[Auto Optimizer] --> O[Weight Adjustment]
+        O --> P[Data Compression]
+        P --> Q[System Adaptation]
+    end
+    
+    C --> D
+    F --> J
+    I --> E
+    M --> G
+    Q --> D
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style D fill:#bbf,stroke:#333,stroke-width:2px
+    style J fill:#9f9,stroke:#333,stroke-width:2px
+    style N fill:#ff9,stroke:#333,stroke-width:2px
 ```
+
+## 🤝 Community & Contributing
+
+### 🌍 **We're Looking For:**
+- **🔬 ML Researchers** for trading algorithms
+- **💻 Python Developers** for core improvements
+- **📊 Traders** for testing and real-world feedback
+- **🎓 Academics** for case studies and research
+- **🤝 Partners** to expand the project
+
+### 🎯 **How to Contribute:**
+1. **⭐ Star the repository** - Helps with visibility!
+2. **🐛 Report issues** - Found a bug? Let us know!
+3. **💡 Suggest features** - What would make bot_sniper_AI better?
+4. **🔬 Submit PRs** - Code contributions welcome!
+5. **📊 Share results** - How are you using the bot?
+
+### 📝 **Contribution Guidelines:**
+- Read our [CONTRIBUTING.md](CONTRIBUTING.md) (to be created)
+- Follow [Protocolo Severino](PROTOCOLO-SEVERINO.md) methodology
+- Test your changes thoroughly
+- Document new features
+
+## 💰 Sponsorship
+
+### 🏆 **Support the Project**
+bot_sniper_AI is developed with rigorous methodology and real-world testing. Your sponsorship helps:
+
+- **🚀 Accelerate development** of new features
+- **🔬 Fund research** in ML for trading
+- **📚 Create educational content** for the community
+- **🛠️ Maintain infrastructure** for testing
+
+### 💎 **Sponsorship Tiers:**
+```
+🥉 Supporter: $5/month
+  • Name in README sponsors section
+  • Access to monthly updates
+
+🥈 Contributor: $15/month
+  • Early access to new features
+  • Voting on roadmap priorities
+  • Special Discord role
+
+🥇 Sponsor: $50/month
+  • Personalized consulting sessions
+  • Priority support
+  • Custom feature requests
+
+💎 Enterprise: $200/month
+  • Custom exchange integrations
+  • Dedicated support channel
+  • White-label solutions
+```
+
+### 🌐 **Sponsorship Platforms:**
+- **GitHub Sponsors**: [Sponsor bernini10](https://github.com/sponsors/bernini10)
+- **Open Collective**: (Coming soon)
+- **Patreon**: (Coming soon)
+
+## 📈 Performance
+
+### 📊 **Current Statistics:**
+- **Database Samples**: 6,669+ patterns in `raw_samples`
+- **Pattern Images**: 6,000+ technical patterns detected
+- **Real Trades**: Learning from actual Bybit executions
+- **Win Rate**: Continuously monitored and optimized
+- **Sharpe Ratio**: Auto-calculated and tracked
+
+### 🎯 **Learning Progress:**
+- **Training Cycles**: Continuous (30-minute intervals)
+- **Experience Memory**: 10,000 capacity
+- **Model Convergence**: Monitored via metrics
+- **Error Reduction**: Tracked via TensorBoard logs
+
+## 📚 Documentation
+
+### 📖 **Complete Documentation:**
+- [🧠 End-to-End Diagram](END_TO_END_DIAGRAM.md) - Complete system flow
+- [📊 Investor Report](RELATORIO_INVESTIDORES_v2.4.0.md) - Detailed system analysis
+- [🏗️ Brain Architecture](brain_architecture.md) - AI system design
+- [🔧 Integration Guide](INTEGRATION_GUIDE.md) - How to integrate
+- [📈 System Status](SYSTEM_STATUS.md) - Current status and metrics
+
+### 🎓 **Educational Resources:**
+- **Jupyter Notebooks**: (Coming soon)
+- **Video Tutorials**: (Coming soon)
+- **Academic Papers**: (Coming soon)
+- **Case Studies**: (Coming soon)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### 🤝 **Open Source Philosophy:**
+We believe in:
+- **Transparency** in algorithmic trading
+- **Education** through open source
+- **Collaboration** with the community
+- **Innovation** through shared knowledge
 
 ---
 
-## 📋 Pré-requisitos
+## 🚀 Get Started Today!
 
-*   Python 3.10+
-*   Conta na Bybit (Futuros) com API Key (Permissões: Orders, Positions).
-*   Bot no Telegram (via BotFather).
-*   **[OPCIONAL]** TradingView Premium (para webhook BTC.D em tempo real).
+1. **⭐ Star the repository** to show your support
+2. **🐛 Check open issues** to see where you can help
+3. **💬 Join discussions** to share ideas
+4. **🔧 Try the bot** with paper trading first
+5. **🤝 Consider sponsoring** to support development
 
----
-
-## ⚙️ Instalação
-
-### 1. Clone o repositório
-```bash
-git clone https://github.com/bernini10/bot_sniper_bybit.git
-cd bot_sniper_bybit
-```
-
-### 2. Instale as dependências
-```bash
-pip install ccxt pandas numpy scipy requests flask
-```
-
-### 3. Configure os Segredos
-Crie um arquivo `.env` na raiz:
-```env
-BYBIT_API_KEY=sua_key_aqui
-BYBIT_SECRET=seu_secret_aqui
-TELEGRAM_TOKEN=seu_token_telegram
-TELEGRAM_CHAT_ID=seu_id_telegram
-```
-
-### 4. [RECOMENDADO] Configure Webhook TradingView PROTOCOLO SEVERINO
-Para dados BTC.D em tempo real, configure o alerta no TradingView:
-
-**Pine Script Alert (15min + detecção >0.3%, CRYPTOCAP:BTC.D):**
-```pine
-//@version=5
-indicator("BTC.D Monitor - Severino", overlay=false)
-
-SEND_ON_CHANGE = input.bool(true, "Só se mudar >0.3%")
-btcDom = request.security("CRYPTOCAP:BTC.D", "15", close)
-sma20 = ta.sma(btcDom, 20)
-direction = btcDom > sma20 ? "LONG" : "SHORT"
-change_pct = ((btcDom - btcDom[1]) / btcDom[1]) * 100
-
-is_candle_close = barstate.isconfirmed
-significant_change = math.abs(change_pct) >= 0.3
-should_alert = is_candle_close and (not SEND_ON_CHANGE or significant_change)
-
-btcDomStr = str.tostring(btcDom, "#.##")
-changeStr = str.tostring(change_pct, "#.##")
-jsonMessage = '{"btc_d_value": ' + btcDomStr + ', "direction": "' + direction + '", "change_pct": ' + changeStr + '}'
-
-if should_alert
-    alert(jsonMessage, alert.freq_once_per_bar_close)
-```
-
-**Configuração do Alert:**
-*   **Webhook URL:** `http://SEU_IP/webhook/btcd`
-*   **Mensagem:** `{{alert.message}}`
-*   **Frequência:** "Qualquer chamada de função"
-*   **Timeframe do gráfico:** 15 minutos (recomendado)
-
-**Arquivo Pine completo:** [btcd_tradingview_frequent.pine](btcd_tradingview_frequent.pine)
-
-### 5. Instale o Sistema Brain Learning
-```bash
-# Instalação completa do sistema de aprendizado
-python3 setup_brain_system.py
-
-# Iniciar treinamento contínuo (background)
-./start_brain_learning.sh
-
-# Verificar status do Brain
-tail -f brain_logs/learning.log
-```
+**📞 Questions? Issues? Suggestions?**
+- GitHub Issues: [Report here](https://github.com/bernini10/bot_sniper_AI/issues)
+- GitHub Discussions: [Join conversation](https://github.com/bernini10/bot_sniper_AI/discussions)
+- Email: bernini10@gmail.com
 
 ---
 
-## 🎮 Como Usar
-
-### Iniciar o Sistema
-O `bot_manager.py` cuida de tudo (logs, restarts, processos):
-
-```bash
-# Iniciar (Background)
-python3 bot_manager.py start
-
-# Ver Status
-python3 bot_manager.py status
-
-# Parar
-python3 bot_manager.py stop
-
-# Reiniciar
-python3 bot_manager.py restart
-```
-
-### Dashboard Web
-Acesse via navegador:
-```
-http://SEU_IP:3001
-```
-
-### Comandos Telegram
-No seu chat com o bot:
-*   `/status` - Saúde do sistema e PIDs ativos.
-*   `/wl` - Ver a Watchlist atual (oportunidades em formação).
-*   `/saldo` - Saldo atualizado da carteira de Futuros.
-*   `/restart` - Reinicia o sistema remotamente.
-
-### Testar PROTOCOLO SEVERINO
-```bash
-# Verificar cenário de mercado atual
-python3 market_context_validator.py
-
-# Testar validação de trade
-python3 -c "from market_context_validator import validate_trade_entry; print(validate_trade_entry('LONG'))"
-
-# Verificação completa do sistema
-./verificacao_completa.sh
-
-# Testar sistema Brain
-python3 test_brain_system.py
-```
-
----
-
-## 📊 Monitoramento e Logs
-
-### Ver Logs em Tempo Real
-```bash
-tail -f logs/bot_executor.log
-tail -f logs/bot_scanner.log
-tail -f logs/webhook_server.log
-```
-
-### Verificar Webhook BTC.D e Cenário
-```bash
-# Dados BTC.D recebidos
-cat btcd_data.json
-
-# Cenário atual e regras
-python3 -c "from market_context_validator import get_current_market_summary; print(get_current_market_summary())"
-
-# Health check do webhook
-curl http://localhost:5555/health
-```
-
----
-
-## 🛡️ Segurança e Robustez
-*   **File Locking:** Sistema imune a "Race Conditions" (uso de `fcntl` para travar arquivos JSON).
-*   **Self-Healing:** O Manager reinicia processos que falham silenciosamente.
-*   **Estado Persistente:** Se o servidor reiniciar, o bot retoma a watchlist do disco.
-*   **Rate Limiting:** Proteção contra ban de API da exchange (11 req/min).
-*   **Post-Entry Validation:** Saída automática quando padrão se invalida (reduz drawdown).
-
----
-
-## 🗺️ Roadmap
-
-### ✅ Concluído (v2.4.0 - PROTOCOLO SEVERINO)
-- [x] **PROTOCOLO SEVERINO:** Validação BTC.D em tempo real com 5 cenários precisos
-- [x] **Correção crítica:** Bug de direção invertida (DOT/USDT, SOL/USDT)
-- [x] **Monitoramento contínuo:** Fecha trades se cenário mudar
-- [x] **Sistema Brain Learning:** Q-Learning com Experience Replay (48 estados)
-- [x] **Webhook TradingView:** Dados atualizados a cada 15min + se mudar >0.3%
-- [x] **Dashboard completo:** Cenário atual + status Brain + todas métricas
-- [x] **Validação pós-entrada V2.3.1:** Threshold 0.85 + confirmação dupla
-- [x] **Verificação automática:** Script `verificacao_completa.sh`
-
-### ✅ Concluído Anteriormente (v2.2.0 → v2.3.0)
-- [x] Validação pós-entrada com 4 critérios de invalidação
-- [x] Análise de correlação BTC/BTC.D com 5 cenários
-- [x] Webhook TradingView para BTC.D (tempo real)
-- [x] Rate Limiter inteligente (redução de 66% nas chamadas)
-- [x] Dashboard web com monitoramento em tempo real
-- [x] Nginx proxy para webhook na porta 80
-- [x] Exibir cenário de mercado atual no Dashboard
-- [x] Vision AI integration para validação de padrões
-
-### 🚧 Em Desenvolvimento (v2.5.0)
-- [ ] **Otimização Brain:** Hiperparâmetros automáticos baseados em performance
-- [ ] **Multi-timeframe analysis:** Análise conjunta 15min + 1h + 4h
-- [ ] **Alertas inteligentes:** Notificações quando cenário muda significativamente
-- [ ] **Backtesting integrado:** Teste estratégias com dados históricos de BTC.D
-- [ ] **Relatórios automáticos:** Performance weekly/monthly com insights
-
-### 🔮 Futuro (v3.0.0+)
-- [ ] **Multi-exchange support:** Binance, OKX, KuCoin
-- [ ] **Estratégias customizadas:** Configuração via UI no dashboard
-- [ ] **Auto-ajuste dinâmico:** Parâmetros se ajustam ao mercado
-- [ ] **Sistema de alertas multi-plataforma:** Discord, Email, SMS
-- [ ] **Mobile app:** Controle remoto completo via iOS/Android
-- [ ] **Copy trading platform:** Seguidores automáticos de sinais
-- [ ] **API pública:** Para integração com outros sistemas
-
----
-
-## 📚 Documentação Adicional - PROTOCOLO SEVERINO
-
-### 📋 Guias Principais
-*   **[README_V2.4.0.md](README_V2.4.0.md)** - Documentação completa da versão 2.4.0
-*   **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** - Guia de integração do PROTOCOLO SEVERINO
-*   **[SYSTEM_STATUS.md](SYSTEM_STATUS.md)** - Status atual do sistema e próximos passos
-*   **[brain_architecture.md](brain_architecture.md)** - Arquitetura do sistema de aprendizado
-
-### 🔧 Implementação
-*   **[market_context_validator.py](market_context_validator.py)** - Validação BTC.D + 5 cenários
-*   **[setup_brain_system.py](setup_brain_system.py)** - Instalador do sistema Brain
-*   **[bot_executor.py](bot_executor.py)** - Executor com validações de direção
-*   **[post_entry_validator.py](post_entry_validator.py)** - Monitoramento pós-entrada V2.3.1
-
-### 📊 TradingView
-*   **[btcd_tradingview_frequent.pine](btcd_tradingview_frequent.pine)** - Código Pine para alertas frequentes
-*   **[btcd_tradingview_simple.pine](btcd_tradingview_simple.pine)** - Versão simplificada
-*   **[webhook_server.py](webhook_server.py)** - Servidor webhook para TradingView
-
-### 🛠️ Ferramentas
-*   **[verificacao_completa.sh](verificacao_completa.sh)** - Verificação completa do sistema
-*   **[implement_all_fixes.sh](implement_all_fixes.sh)** - Script de implementação de correções
-*   **[close_all_positions.py](close_all_positions.py)** - Fechamento emergencial de posições
-*   **[brain_dashboard.py](brain_dashboard.py)** - Dashboard de monitoramento do Brain
-
----
-
-## 🤝 Contribuindo
-
-Pull requests são bem-vindos! Para mudanças maiores, abra uma issue primeiro para discutir o que você gostaria de mudar.
-
----
-
-## 📄 Licença
-
-Proprietary - Uso restrito ao desenvolvedor e clientes autorizados.
-
----
-
-## 📧 Contato
-
-**Severino AI**  
-Email: contato@liquidation-bot.app  
-GitHub: [@bernini10](https://github.com/bernini10)
-
----
-
-*Desenvolvido com PROTOCOLO SEVERINO - v2.4.0 | Última atualização: 16/02/2026*
-
-## 🧠 SISTEMA END-TO-END LEARNING - Protocolo Severino v2.4.0
-
-### 🎯 APRENDIZAGEM REAL COM DADOS REAIS
-
-O Bot Sniper agora possui um sistema completo de aprendizado end-to-end que transforma dados brutos em inteligência real de trading.
-
-**✅ 3 FASES IMPLEMENTADAS:**
-
-#### 1. **INTEGRAÇÃO RESTAURADA**
-- `bot_monitor_v2_with_brain.py` - Monitor integrado com sistema de aprendizado
-- `brain_integration.py` atualizado - Funcionalidades real-time
-- Sistema unificado scanner → monitor → brain → executor
-
-#### 2. **APRENDIZAGEM REAL-TIME**
-- `realtime_feedback_collector.py` - Coleta feedback REAL da Bybit API
-- Database atualizada automaticamente com `trade_result`, `reward`, `brain_decision`
-- Brain aprende com erros/acertos REAIS (não simulação)
-
-#### 3. **OTIMIZAÇÃO AUTOMÁTICA**
-- `data_compactor.py` - Compacta dados mantendo estatísticas de aprendizado
-- Sistema auto-otimizável - ajusta pesos/contra-pesos automaticamente
-- Scanner garantido alimentando modelo mesmo com watchlist cheia
-
-### 🚀 FLUXO END-TO-END COMPLETO
-
-```
-SCANNER → [Padrões] → MONITOR + BRAIN → [Decisões] → EXECUTOR → [Trades] → FEEDBACK REAL → BRAIN LEARNING
-```
-
-### 📊 BENEFÍCIOS DO SISTEMA
-
-**🎯 Para o Bot:**
-- ✅ **Aprendizado real** (não simulado)
-- ✅ **Decisões baseadas em experiência**
-- ✅ **Otimização automática** de parâmetros
-- ✅ **Adaptação a mudanças de mercado**
-- ✅ **Melhoria contínua** com o tempo
-
-**💰 Para o Trader:**
-- ✅ **Menos erros repetidos** (brain aprende com falhas)
-- ✅ **Melhor risk management** (ajuste automático)
-- ✅ **Decisões mais consistentes** (padrão + brain)
-- ✅ **Transparência total** (dashboard com stats)
-- ✅ **Sistema que evolui** (não estagnado)
-
-### 🔬 DADOS E ESTATÍSTICAS
-
-**Database Atual:**
-- **Total amostras:** 6,669+ em `raw_samples`
-- **Padrões detectados:** 6,000+ imagens
-- **Trades com feedback:** Crescendo diariamente
-- **Win rate histórico:** Monitorado em tempo real
-- **Sharpe ratio:** Calculado automaticamente
-
-### 🤝 CONVITE À COMUNIDADE
-
-**🎯 Estamos Procurando:**
-- **🔬 Pesquisadores** em ML para trading
-- **💻 Desenvolvedores** para colaboração
-- **📊 Traders** para testar e fornecer feedback
-- **🎓 Acadêmicos** para estudos de caso
-- **🤝 Parceiros** para expandir o projeto
-
-**💰 Oportunidades de Sponsorship:**
-- **🏆 Naming rights** do sistema de aprendizado
-- **📈 Featured no dashboard** e documentação
-- **🎯 Acesso prioritário** a novas features
-- **🤝 Co-branding** em pesquisas e publicações
-- **🚀 Suporte ao desenvolvimento** contínuo
-
-**🌍 Como Contribuir:**
-1. **⭐ Star o repositório** no GitHub
-2. **🐛 Reportar issues** e bugs encontrados
-3. **💡 Sugerir melhorias** no sistema
-4. **🔬 Contribuir com código** via PRs
-5. **📊 Compartilhar resultados** de uso
-6. **🎯 Tornar-se sponsor** do projeto
-
-### 📞 CONTATO E SUPORTE
-
-**GitHub:** [github.com/bernini10/bot_sniper_bybit](https://github.com/bernini10/bot_sniper_bybit)
-
-**Issues:** Use a seção de Issues do GitHub para:
-- Reportar bugs
-- Sugerir features
-- Pedir ajuda técnica
-- Compartilhar resultados
-
-**Discussions:** Participe das discussões sobre:
-- Melhorias no sistema
-- Casos de uso reais
-- Integrações com outras plataformas
-- Pesquisas acadêmicas relacionadas
-
----
-
-**📅 Última atualização:** 2026-02-17  
-**🚀 Versão:** Protocolo Severino v2.4.0  
-**🧠 Sistema:** End-to-End Learning 100% funcional  
-**💪 Desenvolvido com:** Rigor, precisão e investigação profunda
-
-*"O verdadeiro aprendizado vem não da simulação, mas da realidade dos trades." - Protocolo Severino*
+**🎯 Developed with:** Rigor, precision, and deep investigation (Protocolo Severino)  
+**🚀 Version:** v2.5.0 End-to-End Learning System  
+**📅 Last Updated:** 2026-02-17  
+
+*"True learning comes not from simulation, but from the reality of trades." - Protocolo Severino*
