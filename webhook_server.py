@@ -97,10 +97,20 @@ def webhook_btcd():
             logger.error(f"Não consegui decodificar webhook. Content-Type: {request.content_type}, Body: {raw_data}")
             return jsonify({"error": "Could not decode data", "received": raw_data}), 400
         
-        # Validar dados
-        if 'btc_d_value' not in data:
+        # Validar dados - TradingView pode enviar 'btc_d' ou 'btc_d_value'
+        if 'btc_d_value' not in data and 'btc_d' not in data:
             logger.error(f"Dados inválidos recebidos: {data}")
-            return jsonify({"error": "Missing btc_d_value"}), 400
+            return jsonify({"error": "Missing btc_d_value or btc_d field"}), 400
+        
+        # Normalizar campo btc_d para btc_d_value (TradingView usa 'btc_d')
+        if 'btc_d' in data and 'btc_d_value' not in data:
+            data['btc_d_value'] = data['btc_d']
+            logger.info(f"📝 Normalizado 'btc_d' → 'btc_d_value': {data['btc_d_value']}%")
+        
+        # Garantir que change_pct existe (TradingView pode não enviar)
+        if 'change_pct' not in data:
+            data['change_pct'] = 0.0
+            logger.info(f"📝 Adicionado change_pct padrão: 0.0%")
         
         # Adicionar timestamp
         data['timestamp'] = time.time()

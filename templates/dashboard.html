@@ -61,24 +61,24 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="card border-t-4 border-blue-500 hover:scale-105 transition transform duration-300">
             <h3 class="text-gray-400 text-xs uppercase tracking-widest">Total Equity</h3>
-            <p class="text-3xl font-bold mt-2 text-white" id="equity">Loading...</p>
-            <p class="text-xs text-gray-500 mt-1">Available: <span id="available">$0</span></p>
+            <p class="text-3xl font-bold mt-2 text-white" id="equity">${{ "%.2f"|format(stats.equity) }}</p>
+            <p class="text-xs text-gray-500 mt-1">Available: <span id="available">${{ "%.2f"|format(stats.available) }}</span></p>
         </div>
-        <div class="card border-t-4 border-green-500 hover:scale-105 transition transform duration-300">
+        <a href="/pnl-details" target="_blank" class="card border-t-4 border-green-500 hover:scale-105 transition transform duration-300 block">
             <h3 class="text-gray-400 text-xs uppercase tracking-widest">PnL Today (Est.)</h3>
-            <p class="text-3xl font-bold mt-2" id="pnl-today">$0.00</p>
-            <p class="text-xs text-gray-500 mt-1">Unrealized PnL</p>
-        </div>
-        <div class="card border-t-4 border-purple-500 hover:scale-105 transition transform duration-300">
+            <p class="text-3xl font-bold mt-2 {% if stats.pnl_today >= 0 %}text-neon-green{% else %}text-neon-red{% endif %}" id="pnl-today">{% if stats.pnl_today >= 0 %}+{% endif %}${{ "%.2f"|format(stats.pnl_today) }}</p>
+            <p class="text-xs text-gray-500 mt-1">Unrealized PnL • Click for details</p>
+        </a>
+        <a href="/trades-details" target="_blank" class="card border-t-4 border-purple-500 hover:scale-105 transition transform duration-300 block">
             <h3 class="text-gray-400 text-xs uppercase tracking-widest">Active Trades</h3>
-            <p class="text-3xl font-bold mt-2 text-white" id="open-count">0</p>
-            <p class="text-xs text-gray-500 mt-1">Positions Open</p>
-        </div>
-        <div class="card border-t-4 border-yellow-500 hover:scale-105 transition transform duration-300">
+            <p class="text-3xl font-bold mt-2 text-white" id="open-count">{{ stats.active_count }}</p>
+            <p class="text-xs text-gray-500 mt-1">Positions Open • Click for details</p>
+        </a>
+        <a href="/performance-details" target="_blank" class="card border-t-4 border-yellow-500 hover:scale-105 transition transform duration-300 block">
             <h3 class="text-gray-400 text-xs uppercase tracking-widest">Win Rate (Last 50)</h3>
-            <p class="text-3xl font-bold mt-2 text-yellow-400" id="winrate">--%</p>
-            <p class="text-xs text-gray-500 mt-1"><span id="winrate-detail">Last 30 days (Bybit)</span></p>
-        </div>
+            <p class="text-3xl font-bold mt-2 text-yellow-400" id="winrate">{{ "%.0f"|format(winrate.winrate) }}%</p>
+            <p class="text-xs text-gray-500 mt-1"><span id="winrate-detail">{{ winrate.wins }}W / {{ winrate.losses }}L | {% if winrate.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(winrate.total_pnl) }} USDT (30d)</span> • Click for details</p>
+        </a>
     </div>
 
     <!-- MARKET ANALYSIS (BTC.D) -->
@@ -248,32 +248,59 @@
 
         async function updateData() {
             try {
+                console.log('🔄 Starting updateData...');
+                
                 // 1. STATS
+                console.log('📊 Fetching stats...');
                 const resStats = await fetch('/api/stats');
                 const stats = await resStats.json();
+                console.log('📊 Stats received:', stats);
                 
-                document.getElementById('equity').innerText = `$${parseFloat(stats.equity || 0).toFixed(2)}`;
-                document.getElementById('available').innerText = `$${parseFloat(stats.available || 0).toFixed(2)}`;
-                document.getElementById('open-count').innerText = stats.active_count || 0;
+                // Update basic stats with error handling
+                const equityEl = document.getElementById('equity');
+                const availableEl = document.getElementById('available');
+                const openCountEl = document.getElementById('open-count');
+                
+                if (equityEl) equityEl.innerText = `$${parseFloat(stats.equity || 0).toFixed(2)}`;
+                if (availableEl) availableEl.innerText = `$${parseFloat(stats.available || 0).toFixed(2)}`;  
+                if (openCountEl) openCountEl.innerText = stats.active_count || 0;
                 
                 // PnL Today com cor
                 const pnlToday = parseFloat(stats.pnl_today || 0);
                 const pnlEl = document.getElementById('pnl-today');
-                pnlEl.innerText = (pnlToday >= 0 ? '+' : '') + '$' + pnlToday.toFixed(2);
-                pnlEl.className = 'text-3xl font-bold mt-2 ' + (pnlToday >= 0 ? 'text-neon-green' : 'text-neon-red');
+                if (pnlEl) {
+                    pnlEl.innerText = (pnlToday >= 0 ? '+' : '') + '$' + pnlToday.toFixed(2);
+                    pnlEl.className = 'text-3xl font-bold mt-2 ' + (pnlToday >= 0 ? 'text-neon-green' : 'text-neon-red');
+                }
+                
+                console.log('✅ Stats updated successfully');
                 
                 // 2. WIN RATE
+                console.log('🎯 Fetching winrate...');
                 const resWr = await fetch('/api/winrate');
                 const wr = await resWr.json();
-                document.getElementById('winrate').innerText = wr.winrate.toFixed(0) + '%';
-                const pnlTotal = wr.total_pnl || 0;
-                const pnlSign = pnlTotal >= 0 ? '+' : '';
-                document.getElementById('winrate-detail').innerText = `${wr.wins}W / ${wr.losses}L | ${pnlSign}${pnlTotal.toFixed(2)} USDT (30d)`;
+                console.log('🎯 Winrate received:', wr);
+                
+                const winrateEl = document.getElementById('winrate');
+                const winrateDetailEl = document.getElementById('winrate-detail');
+                
+                if (winrateEl) winrateEl.innerText = wr.winrate.toFixed(0) + '%';
+                if (winrateDetailEl) {
+                    const pnlTotal = wr.total_pnl || 0;
+                    const pnlSign = pnlTotal >= 0 ? '+' : '';
+                    winrateDetailEl.innerText = `${wr.wins}W / ${wr.losses}L | ${pnlSign}${pnlTotal.toFixed(2)} USDT (30d)`;
+                }
+                
+                console.log('✅ Winrate updated successfully');
                 
                 // 3. WATCHLIST
+                console.log('📋 Fetching watchlist...');
                 const resWl = await fetch('/api/watchlist');
                 const wl = await resWl.json();
-                document.getElementById('wl-count').innerText = `${wl.length} Pairs`;
+                console.log('📋 Watchlist received, length:', wl.length);
+                
+                const wlCountEl = document.getElementById('wl-count');
+                if (wlCountEl) wlCountEl.innerText = `${wl.length} Pairs`;
                 
                 const wlContainer = document.getElementById('watchlist-container');
                 wlContainer.innerHTML = '';
@@ -472,15 +499,22 @@
             } catch(e) { console.error('Vision alerts error:', e); }
         }
 
-        setInterval(fetchVisionAlerts, 5000);
-        fetchVisionAlerts();
-
-        setInterval(updateData, 3000); // Update a cada 3s
-        setInterval(fetchMarket, 5000); // Update market a cada 5s
-        setInterval(fetchVisionAnalysis, 10000); // Update vision a cada 10s
-        updateData();
-        fetchMarket();
-        fetchVisionAnalysis();
+        // Start periodic updates
+        console.log('🚀 Dashboard JavaScript initialized');
+        
+        // Set intervals for live updates
+        setInterval(updateData, 5000); // Update every 5 seconds
+        setInterval(fetchMarket, 10000); // Update market every 10 seconds
+        setInterval(fetchVisionAnalysis, 15000); // Update vision every 15 seconds
+        setInterval(fetchVisionAlerts, 5000); // Update alerts every 5 seconds
+        
+        // Initial calls with delay
+        setTimeout(() => {
+            updateData();
+            fetchMarket();
+            fetchVisionAnalysis();
+            fetchVisionAlerts();
+        }, 2000);
     </script>
     </div>
 </body>

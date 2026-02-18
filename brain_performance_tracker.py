@@ -226,6 +226,192 @@ class BrainPerformanceTracker:
             logger.error(f"❌ Erro ao buscar multiplicador de confiança: {e}")
             return 1.0
     
+    def record_feedback(self, feedback_data):
+        """
+        Registra feedback diretamente (usado pelo process_closed_trades_from_cache)
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            c = conn.cursor()
+            
+            # Verificar se já existe feedback para esta amostra
+            c.execute('SELECT id FROM trade_performance WHERE brain_sample_id = ?', 
+                     (feedback_data['brain_sample_id'],))
+            
+            if c.fetchone():
+                logger.warning(f"⚠️ Feedback já registrado para sample_id {feedback_data['brain_sample_id']}")
+                conn.close()
+                return False
+            
+            # Inserir novo feedback
+            c.execute('''
+                INSERT INTO trade_performance 
+                (brain_sample_id, symbol, pattern_detected, actual_pnl, actual_direction,
+                 success_binary, performance_score, trade_duration_hours, opened_at, closed_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                feedback_data['brain_sample_id'],
+                feedback_data['symbol'],
+                feedback_data['pattern_detected'],
+                feedback_data['actual_pnl'],
+                feedback_data['actual_direction'],
+                feedback_data['success_binary'],
+                feedback_data['performance_score'],
+                feedback_data['trade_duration_hours'],
+                feedback_data['opened_at'],
+                feedback_data['closed_at']
+            ))
+            
+            # Atualizar métricas do padrão
+            self._update_pattern_metrics(c, feedback_data['pattern_detected'])
+            
+            conn.commit()
+            conn.close()
+            
+            # Marcar amostra como usada para treinamento
+            self._mark_sample_as_trained(feedback_data['brain_sample_id'])
+            
+            logger.info(f"📝 Feedback direto registrado: {feedback_data['symbol']} → P&L: {feedback_data['actual_pnl']:.3f}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao registrar feedback direto: {e}")
+            return False
+    
+    def _mark_sample_as_trained(self, sample_id):
+        """Marca amostra como usada para treinamento (evita retreino)"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            c = conn.cursor()
+            
+            # Adicionar coluna se não existir
+            c.execute("PRAGMA table_info(raw_samples)")
+            columns = [col[1] for col in c.fetchall()]
+            
+            if 'training_used' not in columns:
+                c.execute('ALTER TABLE raw_samples ADD COLUMN training_used INTEGER DEFAULT 0')
+                c.execute('ALTER TABLE raw_samples ADD COLUMN training_used_at INTEGER')
+            
+            c.execute('''
+                UPDATE raw_samples 
+                SET training_used = 1, 
+                    training_used_at = ?
+                WHERE id = ?
+            ''', (int(time.time()), sample_id))
+            
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao marcar amostra como treinada: {e}")
+    
+    def process_closed_trades_from_cache(self, max_age_hours=24):
+        """
+        Processa trades fechados do cache e conecta com predições da IA
+        Retorna número de feedbacks processados
+        """
+        try:
+            import json
+            import os
+            import time
+            
+            cache_file = os.path.join(os.path.dirname(self.db_path), 'closed_pnl_cache.json')
+            if not os.path.exists(cache_file):
+                logger.warning("⚠️ Cache de trades fechados não encontrado")
+                return 0
+            
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+            
+            trades = cache_data.get('trades', [])
+            cache_updated = cache_data.get('updated_at', 0)
+            
+            # Verificar se cache está atualizado (últimas 24h)
+            if time.time() - cache_updated > (max_age_hours * 3600):
+                logger.warning(f"⚠️ Cache desatualizado ({max_age_hours}h+)")
+                return 0
+            
+            if not trades:
+                logger.info("📭 Nenhum trade fechado no cache")
+                return 0
+            
+            # Carregar trades abertos do histórico
+            history_file = os.path.join(os.path.dirname(self.db_path), 'trades_history.json')
+            if not os.path.exists(history_file):
+                logger.warning("⚠️ Histórico de trades não encontrado")
+                return 0
+            
+            with open(history_file, 'r') as f:
+                open_trades = json.load(f)
+            
+            feedbacks_processed = 0
+            
+            # Para cada trade fechado, tentar encontrar correspondente aberto
+            for closed_trade in trades:
+                closed_symbol = closed_trade.get('symbol', '').replace('USDT', '/USDT')
+                closed_pnl = float(closed_trade.get('pnl', 0))
+                closed_time = int(closed_trade.get('closed_at', 0) / 1000)  # Converter ms para s
+                
+                # Buscar trade aberto correspondente (mesmo símbolo, ainda aberto)
+                matching_open_trade = None
+                for open_trade in open_trades:
+                    if (open_trade.get('symbol') == closed_symbol and 
+                        open_trade.get('status') == 'OPEN' and
+                        'opened_at_timestamp' in open_trade):
+                        
+                        # Verificar se tempo de fechamento é razoável (1-48h após abertura)
+                        open_time = open_trade.get('opened_at_timestamp', 0)
+                        time_diff = closed_time - open_time
+                        
+                        if 3600 <= time_diff <= 172800:  # 1h a 48h
+                            matching_open_trade = open_trade
+                            break
+                
+                if matching_open_trade:
+                    # Conectar com predição da IA
+                    brain_sample_id = matching_open_trade.get('brain_sample_id')
+                    trade_id = matching_open_trade.get('trade_id', 'unknown')
+                    
+                    if brain_sample_id:
+                        # Criar feedback
+                        feedback_data = {
+                            'brain_sample_id': brain_sample_id,
+                            'symbol': closed_symbol,
+                            'pattern_detected': matching_open_trade.get('pattern_data', {}).get('pattern_name', 'Unknown'),
+                            'actual_pnl': closed_pnl,
+                            'actual_direction': 'LONG' if closed_pnl > 0 else 'SHORT',
+                            'success_binary': 1 if closed_pnl > 0 else 0,
+                            'performance_score': min(1.0, max(0.0, (closed_pnl + 10) / 20)),  # Normalizar para 0-1
+                            'trade_duration_hours': time_diff / 3600,
+                            'opened_at': open_time,
+                            'closed_at': closed_time
+                        }
+                        
+                        # Registrar feedback
+                        self.record_feedback(feedback_data)
+                        feedbacks_processed += 1
+                        
+                        # Marcar trade como fechado no histórico
+                        matching_open_trade['status'] = 'CLOSED'
+                        matching_open_trade['closed_at'] = closed_time
+                        matching_open_trade['actual_pnl'] = closed_pnl
+                        matching_open_trade['feedback_processed'] = True
+                        
+                        logger.info(f"✅ Feedback conectado: {trade_id} → P&L {closed_pnl:.3f} USDT")
+            
+            # Salvar histórico atualizado
+            if feedbacks_processed > 0:
+                with open(history_file, 'w') as f:
+                    json.dump(open_trades, f, indent=2)
+                
+                logger.info(f"📊 Processados {feedbacks_processed} feedbacks de trades fechados")
+            
+            return feedbacks_processed
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao processar trades fechados: {e}")
+            return 0
+    
     def get_performance_summary(self):
         """Retorna resumo geral de performance do sistema"""
         try:

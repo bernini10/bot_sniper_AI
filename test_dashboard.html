@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dashboard</title>
+</head>
+<body>
+    <div>
+        <h1>Test Dashboard</h1>
+        <p id="equity">Loading...</p>
+        <p id="pnl-today">$0.00</p>
+        <p id="open-count">0</p>
+        <p id="winrate">--%</p>
+    </div>
+
+    <script>
+        console.log('🚀 Test JavaScript loaded!');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM loaded');
+            
+            const equityEl = document.getElementById('equity');
+            if (equityEl) {
+                equityEl.innerText = 'JS WORKING!';
+                console.log('✅ Successfully updated equity element');
+            }
+            
+            // Test API call
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 Stats data:', data);
+                    if (equityEl) {
+                        equityEl.innerText = '$' + (data.equity || 0).toFixed(2);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error fetching stats:', error);
+                });
+        });
+    </script>
+</body>
+</html>

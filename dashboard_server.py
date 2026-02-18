@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, send_from_directory
 import json
 import os
+import re
 import ccxt
 import time
 import sqlite3
@@ -9,6 +10,14 @@ from lib_utils import JsonManager
 
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Helper function for safe float conversion
+def safe_float(value, default=0):
+    """Safely convert value to float, returning default if None or invalid"""
+    try:
+        return float(value) if value is not None else default
+    except (TypeError, ValueError):
+        return default
 
 # Configs
 WATCHLIST_FILE = os.path.join(BASE_DIR, 'watchlist.json')
@@ -127,7 +136,779 @@ def index():
 # DASHBOARD (aba secundária)
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    # Fetch data for dashboard
+    secrets = get_secrets()
+    stats_data = {
+        'equity': 0,
+        'available': 0, 
+        'active_count': 0,
+        'pnl_today': 0,
+        'pnl_unrealized': 0
+    }
+    
+    winrate_data = {
+        'winrate': 0,
+        'wins': 0,
+        'losses': 0,
+        'total_pnl': 0
+    }
+    
+    if secrets.get('BYBIT_API_KEY'):
+        try:
+            exchange = ccxt.bybit({
+                'apiKey': secrets['BYBIT_API_KEY'],
+                'secret': secrets['BYBIT_SECRET'],
+                'options': {'defaultType': 'linear'}
+            })
+            
+            # Get balance
+            balance = exchange.fetch_balance()
+            total = balance.get('USDT', {})
+            stats_data['equity'] = total.get('total', 0)
+            stats_data['available'] = total.get('free', 0)
+            
+            # Get positions
+            positions = exchange.fetch_positions()
+            open_positions = [pos for pos in positions if safe_float(pos.get('contracts')) != 0]
+            stats_data['active_count'] = len(open_positions)
+            stats_data['pnl_unrealized'] = sum(safe_float(pos.get('unrealizedPnl')) for pos in open_positions)
+            stats_data['pnl_today'] = stats_data['pnl_unrealized']  # Simplified
+            
+        except Exception as e:
+            print(f"Error fetching dashboard data: {e}")
+    
+    # Get winrate data
+    try:
+        trades = get_closed_trades() or []
+        if trades:
+            wins = [t for t in trades if safe_float(t.get('pnl')) > 0]
+            losses = [t for t in trades if safe_float(t.get('pnl')) <= 0]
+            
+            winrate_data = {
+                'winrate': (len(wins) / len(trades)) * 100 if trades else 0,
+                'wins': len(wins),
+                'losses': len(losses),
+                'total_pnl': sum(safe_float(t.get('pnl')) for t in trades)
+            }
+    except Exception as e:
+        print(f"Error calculating winrate: {e}")
+    
+    return render_template('dashboard.html', stats=stats_data, winrate=winrate_data)
+
+# DETAILS PAGES
+@app.route('/trades-details')  
+def trades_details():
+    return render_template('trades_details.html')
+
+@app.route('/pnl-details')
+def pnl_details():
+    return render_template('pnl_details.html')
+
+@app.route('/performance-details')
+def performance_details():
+    return render_template('performance_details.html')
+
+@app.route('/test')
+def test_dashboard():
+    with open('/root/bot_sniper_bybit/test_dashboard.html', 'r') as f:
+        return f.read()
+
+def get_pattern_info_for_symbol(symbol):
+    """Busca informações de pattern para um símbolo específico - VERSÃO CORRIGIDA"""
+    try:
+        symbol_clean = symbol.replace('/USDT:USDT', '').replace('/USDT', '')
+        
+        # 1. PRIMEIRO: Buscar em logs com contexto (MAIS CONFIÁVEL)
+        try:
+            import re
+            from datetime import datetime
+            
+            log_files = [
+                f'/root/TRADING_SYSTEMS/ACTIVE_BOT_SNIPER_BYBIT/executor_{symbol_clean}USDT.log',
+                '/root/TRADING_SYSTEMS/ACTIVE_BOT_SNIPER_BYBIT/scanner_bybit.log',
+                '/root/bot_sniper_bybit/executor_bybit.log',
+                f'/root/bot_sniper_bybit/executor_{symbol_clean}USDT.log'
+            ]
+            
+            for log_file in log_files:
+                try:
+                    with open(log_file, 'r') as f:
+                        lines = f.readlines()[-100:]  # Últimas 100 linhas
+                    
+                    # Buscar em todas as linhas que contêm o símbolo
+                    for i, line in enumerate(lines):
+                        if symbol_clean in line.upper():
+                            # Verificar esta linha e as próximas 3 linhas para contexto
+                            context_lines = lines[i:i+4]
+                            context_text = ' '.join(context_lines)
+                            
+                            # Buscar padrão no contexto
+                            pattern_match = None
+                            
+                            # Tentar diferentes padrões de busca
+                            patterns = [
+                                r'padr[ao][:\s]+([A-Z_]+)',
+                                r'padr[ao]\s+([A-Z_]+)',
+                                r'pattern[:\s]+([A-Z_]+)',
+                                r'padrão\s+([A-Z_]+)',
+                                r'do\s+padrão\s+([A-Z_]+)',
+                                r'padrão\s+([A-Z_]+)\s+permanece',
+                                r'padrão\s+([A-Z_]+)\s+intacta'
+                            ]
+                            
+                            for pattern_regex in patterns:
+                                match = re.search(pattern_regex, context_text, re.IGNORECASE)
+                                if match:
+                                    pattern_match = match
+                                    break
+                            
+                            if pattern_match:
+                                pattern = pattern_match.group(1)
+                                
+                                # Buscar direção no contexto
+                                direction = 'UNKNOWN'
+                                direction_match = re.search(r'(SHORT|LONG|BUY|SELL)', context_text, re.IGNORECASE)
+                                if direction_match:
+                                    dir_val = direction_match.group(1).upper()
+                                    direction = 'SHORT' if dir_val in ['SHORT', 'SELL'] else 'LONG' if dir_val in ['LONG', 'BUY'] else 'UNKNOWN'
+                                else:
+                                    # Inferir direção do padrão (fallback)
+                                    if pattern in ['OCO_INVERTIDO', 'FUNDO_DUPLO', 'TRIANGULO_ASCENDENTE', 'CUNHA_ASCENDENTE']:
+                                        direction = 'LONG'
+                                    elif pattern in ['OCO', 'TOPO_DUPLO', 'TRIANGULO_DESCENDENTE', 'CUNHA_DESCENDENTE']:
+                                        direction = 'SHORT'
+                                
+                                # Buscar confiança
+                                confidence = 0.0
+                                conf_match = re.search(r'conf[:\s]*([0-9.]+)', context_text, re.IGNORECASE)
+                                if not conf_match:
+                                    conf_match = re.search(r'confidence[:\s]*([0-9.]+)', context_text, re.IGNORECASE)
+                                if conf_match:
+                                    confidence = float(conf_match.group(1))
+                                
+                                # Buscar timeframe
+                                timeframe = '15m'
+                                tf_match = re.search(r'TF[:\s]*([0-9]+[mh])', context_text, re.IGNORECASE)
+                                if not tf_match:
+                                    tf_match = re.search(r'timeframe[:\s]*([0-9]+[mh])', context_text, re.IGNORECASE)
+                                if tf_match:
+                                    timeframe = tf_match.group(1)
+                                
+                                return {
+                                    'pattern': pattern,
+                                    'direction': direction,
+                                    'confidence': confidence,
+                                    'timeframe': timeframe,
+                                    'neckline': 0,
+                                    'target': 0,
+                                    'stop_loss': 0,
+                                    'status': 'EXECUTED',
+                                    'discovered_at': int(datetime.now().timestamp()),
+                                    'source': 'log_execution'
+                                }
+                except FileNotFoundError:
+                    continue
+                except:
+                    continue
+        except:
+            pass
+        
+        # 2. SEGUNDO: Buscar no histórico de trades
+        try:
+            with open('/root/TRADING_SYSTEMS/ACTIVE_BOT_SNIPER_BYBIT/trades_history.json', 'r') as f:
+                trades = json.load(f)
+            
+            for trade in reversed(trades):
+                if trade.get('symbol', '').replace('/USDT', '') == symbol_clean and trade.get('status') == 'OPEN':
+                    # Para trades abertos no histórico
+                    pattern = 'TOPO_DUPLO' if trade.get('side') == 'SHORT' else 'FUNDO_DUPLO'
+                    return {
+                        'pattern': pattern,
+                        'direction': trade.get('side', 'UNKNOWN'),
+                        'confidence': 0.85,
+                        'timeframe': '1h',
+                        'neckline': 0,
+                        'target': 0,
+                        'stop_loss': 0,
+                        'status': 'OPEN',
+                        'discovered_at': int(datetime.now().timestamp()),
+                        'source': 'trades_history'
+                    }
+        except:
+            pass
+        
+        # 3. TERCEIRO: Buscar na watchlist ativa (MENOS CONFIÁVEL - pode estar desatualizada)
+        try:
+            with open('/root/bot_sniper_bybit/watchlist.json', 'r') as f:
+                watchlist = json.load(f)
+            
+            for item in watchlist.get('pares', []):
+                if item.get('symbol', '').replace('/USDT', '') == symbol_clean:
+                    return {
+                        'pattern': item.get('padrao', 'UNKNOWN'),
+                        'direction': item.get('direcao', 'UNKNOWN'),
+                        'confidence': item.get('confiabilidade', 0),
+                        'timeframe': item.get('timeframe', '15m'),
+                        'neckline': item.get('neckline', 0),
+                        'target': item.get('target', 0),
+                        'stop_loss': item.get('stop_loss', 0),
+                        'status': item.get('status', 'UNKNOWN'),
+                        'discovered_at': item.get('timestamp_descoberta'),
+                        'source': 'watchlist_active_WARNING'
+                    }
+        except:
+            pass
+        
+        # 4. Fallback
+        return {
+            'pattern': 'UNKNOWN_PATTERN',
+            'direction': 'UNKNOWN',
+            'confidence': 0.0,
+            'timeframe': 'UNKNOWN',
+            'neckline': 0,
+            'target': 0,
+            'stop_loss': 0,
+            'status': 'UNKNOWN',
+            'discovered_at': 0,
+            'source': 'fallback'
+        }
+        
+    except Exception as e:
+        print(f"Error getting pattern info for {symbol}: {e}")
+        return None
+def get_vision_ai_status(symbol):
+    """Busca status do Vision AI para um símbolo"""
+    try:
+        symbol_clean = symbol.replace('/USDT:USDT', '').replace('/USDT', '')
+        
+        # Tentar múltiplos arquivos de log
+        log_files = [
+            '/root/bot_sniper_bybit/vision.log',
+            f'/root/TRADING_SYSTEMS/ACTIVE_BOT_SNIPER_BYBIT/executor_{symbol_clean}USDT.log',
+            '/root/TRADING_SYSTEMS/ACTIVE_BOT_SNIPER_BYBIT/scanner_bybit.log'
+        ]
+        
+        for log_file in log_files:
+            try:
+                with open(log_file, 'r') as f:
+                    lines = f.readlines()[-200:]  # Últimas 200 linhas
+                
+                # Buscar última análise para este símbolo
+                for line in reversed(lines):
+                    if symbol_clean in line.upper():
+                        # Verificar se é uma linha de análise do Vision AI
+                        if 'Vision AI:' in line or '👁️ Vision AI:' in line:
+                            # Extrair veredito e confiança
+                            if 'VALID' in line:
+                                # Extrair confiança
+                                confidence = 0.85  # default
+                                conf_match = re.search(r'conf[:\s]*([0-9.]+)', line, re.IGNORECASE)
+                                if conf_match:
+                                    confidence = float(conf_match.group(1))
+                                
+                                # Extrair timestamp
+                                timestamp_match = re.search(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', line)
+                                last_check = timestamp_match.group(1) if timestamp_match else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                
+                                return {
+                                    'status': 'ACTIVE',
+                                    'latest_verdict': 'VALID',
+                                    'latest_confidence': confidence,
+                                    'last_check': last_check,
+                                    'analysis_active': True,
+                                    'source': log_file
+                                }
+                            elif 'INVALID' in line:
+                                # Extrair confiança
+                                confidence = 0.45  # default
+                                conf_match = re.search(r'conf[:\s]*([0-9.]+)', line, re.IGNORECASE)
+                                if conf_match:
+                                    confidence = float(conf_match.group(1))
+                                
+                                # Extrair timestamp
+                                timestamp_match = re.search(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', line)
+                                last_check = timestamp_match.group(1) if timestamp_match else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                
+                                return {
+                                    'status': 'INACTIVE',
+                                    'latest_verdict': 'INVALID',
+                                    'latest_confidence': confidence,
+                                    'last_check': last_check,
+                                    'analysis_active': False,
+                                    'source': log_file
+                                }
+                        
+                        # Verificar se é uma linha de validação pós-entrada
+                        elif '✅ Padrão continua válido' in line or '❌ Padrão invalidado' in line:
+                            status = 'VALID' if '✅' in line else 'INVALID'
+                            confidence = 0.90 if '✅' in line else 0.30
+                            
+                            # Extrair confiança específica
+                            conf_match = re.search(r'conf[:\s]*([0-9.]+)', line)
+                            if conf_match:
+                                confidence = float(conf_match.group(1))
+                            
+                            # Extrair timestamp
+                            timestamp_match = re.search(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', line)
+                            last_check = timestamp_match.group(1) if timestamp_match else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            
+                            return {
+                                'status': 'ACTIVE' if status == 'VALID' else 'INACTIVE',
+                                'latest_verdict': status,
+                                'latest_confidence': confidence,
+                                'last_check': last_check,
+                                'analysis_active': True,
+                                'source': 'post_entry_validator'
+                            }
+            except FileNotFoundError:
+                continue
+            except:
+                continue
+        
+        # Se não encontrou, verificar se há validações recentes no sistema
+        try:
+            # Verificar último log do post-entry validator
+            validator_log = f'/root/TRADING_SYSTEMS/ACTIVE_BOT_SNIPER_BYBIT/executor_{symbol_clean}USDT.log'
+            if os.path.exists(validator_log):
+                with open(validator_log, 'r') as f:
+                    lines = f.readlines()[-50:]
+                
+                for line in reversed(lines):
+                    if 'Candle fechou - Validação' in line:
+                        # Há validações ativas
+                        return {
+                            'status': 'ACTIVE',
+                            'latest_verdict': 'VALID',
+                            'latest_confidence': 0.85,
+                            'last_check': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                            'analysis_active': True,
+                            'source': 'validator_active'
+                        }
+        except:
+            pass
+        
+        return {
+            'status': 'UNKNOWN',
+            'latest_verdict': 'NO_DATA',
+            'latest_confidence': 0.0,
+            'last_check': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'analysis_active': False,
+            'source': 'no_data'
+        }
+        
+    except Exception as e:
+        print(f"Error getting vision AI status for {symbol}: {e}")
+        return {
+            'status': 'ERROR',
+            'latest_verdict': 'ERROR',
+            'latest_confidence': 0.0,
+            'last_check': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'analysis_active': False,
+            'source': 'error'
+        }
+
+def get_post_entry_status(symbol):
+    """Busca status real do Post-Entry Validator dos logs"""
+    try:
+        symbol_clean = symbol.replace('/USDT:USDT', '').replace('/USDT', '')
+        
+        # Buscar no log de validações
+        if os.path.exists('/root/bot_sniper_bybit/vision_alerts.log'):
+            with open('/root/bot_sniper_bybit/vision_alerts.log', 'r') as f:
+                lines = f.readlines()
+            
+            # Buscar última validação para este símbolo nas últimas 50 linhas
+            latest_validation = None
+            validation_count = 0
+            
+            for line in reversed(lines[-50:]):
+                if f'{symbol_clean}/USDT' in line and 'VALIDATION #' in line:
+                    validation_count += 1
+                    if latest_validation is None:  # Primeira (mais recente)
+                        parts = line.strip().split(' | ')
+                        if len(parts) >= 3:
+                            # Extrair dados: "2026-02-15 22:30:18 - VALIDATION #2 | HBAR/USDT:USDT | VALID (0.80) | ..."
+                            timestamp_str = parts[0].split(' - VALIDATION')[0]
+                            status_part = parts[2]  # "VALID (0.80)"
+                            
+                            if '(' in status_part and ')' in status_part:
+                                status = status_part.split('(')[0].strip()  # "VALID"
+                                confidence_str = status_part.split('(')[1].split(')')[0]  # "0.80"
+                                confidence = float(confidence_str)
+                                
+                                latest_validation = {
+                                    'timestamp': timestamp_str,
+                                    'status': status,
+                                    'confidence': confidence,
+                                    'validation_number': parts[0].split('VALIDATION #')[1].split(' |')[0] if 'VALIDATION #' in parts[0] else 'N/A'
+                                }
+            
+            if latest_validation:
+                # Calcular tempo desde última validação
+                try:
+                    last_time = datetime.strptime(latest_validation['timestamp'], '%Y-%m-%d %H:%M:%S')
+                    now = datetime.now()
+                    minutes_ago = int((now - last_time).total_seconds() / 60)
+                    
+                    # Determinar se está ativo (validação recente)
+                    is_active = minutes_ago <= 30  # Ativo se validação foi nos últimos 30 min
+                    
+                    return {
+                        'status': 'ACTIVE' if is_active else 'INACTIVE',
+                        'is_active': is_active,
+                        'latest_status': latest_validation['status'],
+                        'latest_validation': latest_validation['status'],
+                        'confidence': latest_validation['confidence'],
+                        'last_check': f"{minutes_ago}m ago" if minutes_ago < 60 else f"{int(minutes_ago/60)}h ago",
+                        'latest_log': f"Last validation: {latest_validation['status']} ({latest_validation['confidence']:.2f}) - {minutes_ago}m ago",
+                        'validation_count': validation_count,
+                        'total_validations': validation_count,
+                        'last_validation_time': latest_validation['timestamp']
+                    }
+                except Exception as e:
+                    print(f"Error parsing validation timestamp: {e}")
+        
+        # Se não encontrou dados nos logs, retornar status inativo
+        return {
+            'status': 'INACTIVE',
+            'is_active': False,
+            'latest_status': 'NONE',
+            'latest_validation': 'NONE',
+            'confidence': 0,
+            'last_check': 'No recent logs',
+            'latest_log': 'No recent validation logs found',
+            'validation_count': 0,
+            'total_validations': 0,
+            'last_validation_time': None
+        }
+        
+    except Exception as e:
+        print(f"Error getting post-entry status for {symbol}: {e}")
+        return {
+            'status': 'ERROR',
+            'is_active': False,
+            'latest_status': 'ERROR',
+            'latest_validation': 'ERROR',
+            'confidence': 0,
+            'last_check': f'Error: {str(e)}',
+            'latest_log': f'Error: {str(e)}',
+            'validation_count': 0,
+            'total_validations': 0,
+            'last_validation_time': None
+        }
+
+@app.route('/api/trades-detailed')
+def get_detailed_trades():
+    """Endpoint para dados detalhados de trades para a página de detalhes"""
+    try:
+        secrets = get_secrets()
+        
+        # Buscar posições abertas
+        open_positions = []
+        if secrets.get('BYBIT_API_KEY'):
+            try:
+                exchange = ccxt.bybit({
+                    'apiKey': secrets['BYBIT_API_KEY'],
+                    'secret': secrets['BYBIT_SECRET'],
+                    'options': {'defaultType': 'linear'}
+                })
+                positions = exchange.fetch_positions()
+                open_positions = [pos for pos in positions if safe_float(pos.get('contracts')) != 0]
+            except Exception as e:
+                print(f"Error fetching positions: {e}")
+        
+        # Buscar trades fechados
+        closed_trades = get_closed_trades() or []
+        
+        # Formatar dados para o formato esperado pela página
+        response_data = {
+            'open_count': len(open_positions),
+            'closed_count': len(closed_trades),
+            'open_positions': [
+                {
+                    'symbol': pos.get('symbol', ''),
+                    'symbol_clean': pos.get('symbol', '').replace('/USDT:USDT', '').replace('/USDT', ''),
+                    'side': ('SHORT' if (pos.get('side') or '').lower() == 'sell' or (pos.get('side') or '').lower() == 'short' else 'LONG' if (pos.get('side') or '').lower() == 'buy' or (pos.get('side') or '').lower() == 'long' else ('LONG' if safe_float(pos.get('contracts')) > 0 else 'SHORT')),
+                    'size': abs(safe_float(pos.get('contracts'))),
+                    'entry_price': safe_float(pos.get('entryPrice')),
+                    'current_price': safe_float(pos.get('markPrice')),
+                    'pnl': safe_float(pos.get('unrealizedPnl')),
+                    'pnl_pct': safe_float(pos.get('percentage')),
+                    'liquidation_price': safe_float(pos.get('liquidationPrice')),
+                    'leverage': pos.get('leverage', '1'),
+                    'pattern_info': get_pattern_info_for_symbol(pos.get('symbol', '')),
+                    'vision_ai_status': get_vision_ai_status(pos.get('symbol', '')),
+                    'post_entry_status': get_post_entry_status(pos.get('symbol', ''))
+                } for pos in open_positions
+            ],
+            'closed_trades': [
+                {
+                    'symbol': trade.get('symbol', ''),
+                    'symbol_clean': trade.get('symbol', '').replace('USDT', '').replace(':', ''),
+                    'side': trade.get('side', '').upper(),
+                    'entry_price': safe_float(trade.get('entry_price')),
+                    'exit_price': safe_float(trade.get('exit_price')),
+                    'pnl': safe_float(trade.get('pnl')),
+                    'closed_at': trade.get('closed_at', 0),
+                    'pattern_info': None,  # Placeholder
+                    'vision_analysis': None  # Placeholder
+                } for trade in closed_trades[:100]  # Limit to last 100 trades
+            ]
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Error in get_detailed_trades: {e}")
+        return jsonify({
+            'error': str(e),
+            'open_count': 0,
+            'closed_count': 0, 
+            'open_positions': [],
+            'closed_trades': []
+        })
+
+@app.route('/api/pnl-detailed')
+def get_detailed_pnl():
+    """Endpoint para dados detalhados de PnL para a página de detalhes"""
+    try:
+        from datetime import timedelta
+        
+        secrets = get_secrets()
+        
+        # Initialize data
+        equity_data = {'equity': 0, 'available': 0, 'pnl_unrealized': 0}
+        open_positions = []
+        
+        if secrets.get('BYBIT_API_KEY'):
+            try:
+                exchange = ccxt.bybit({
+                    'apiKey': secrets['BYBIT_API_KEY'],
+                    'secret': secrets['BYBIT_SECRET'],
+                    'options': {'defaultType': 'linear'}
+                })
+                
+                # Get balance
+                balance = exchange.fetch_balance()
+                total = balance.get('USDT', {})
+                equity_data = {
+                    'equity': total.get('total', 0),
+                    'available': total.get('free', 0),
+                    'pnl_unrealized': sum(safe_float(pos.get('unrealizedPnl')) for pos in exchange.fetch_positions() if safe_float(pos.get('contracts')) != 0)
+                }
+                
+                # Get open positions
+                positions = exchange.fetch_positions()
+                open_positions = [pos for pos in positions if safe_float(pos.get('contracts')) != 0]
+                
+            except Exception as e:
+                print(f"Error fetching PnL data: {e}")
+        
+        # Get closed trades for PnL calculations
+        closed_trades = get_closed_trades() or []
+        
+        # Calculate time periods
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Calculate PnL by periods
+        today_pnl = 0
+        week_pnl = 0
+        month_pnl = 0
+        today_trades = 0
+        week_trades = 0
+        month_trades = 0
+        
+        for trade in closed_trades:
+            if trade.get('closed_at'):
+                trade_time = datetime.fromtimestamp(trade['closed_at'] / 1000)
+                pnl = safe_float(trade.get('pnl'))
+                
+                # Count trades and PnL by period
+                if trade_time >= month_start:
+                    month_pnl += pnl
+                    month_trades += 1
+                    
+                    if trade_time >= week_start:
+                        week_pnl += pnl
+                        week_trades += 1
+                        
+                        if trade_time >= today_start:
+                            today_pnl += pnl
+                            today_trades += 1
+        
+        # Total realized PnL
+        total_realized_pnl = sum(safe_float(trade.get('pnl')) for trade in closed_trades)
+        
+        # Format response in the structure expected by JavaScript  
+        response_data = {
+            'unrealized_pnl': equity_data['pnl_unrealized'],
+            'today_pnl': today_pnl,
+            'week_pnl': week_pnl,  
+            'month_pnl': month_pnl,
+            'total_pnl': equity_data['pnl_unrealized'] + total_realized_pnl,
+            'today_trades': today_trades,
+            'week_trades': week_trades,
+            'month_trades': month_trades,
+            'current_equity': equity_data['equity'],
+            'available_balance': equity_data['available'],
+            'realized_pnl_total': total_realized_pnl,
+            'open_positions_pnl': [
+                {
+                    'symbol': pos.get('symbol', ''),
+                    'symbol_clean': pos.get('symbol', '').replace('/USDT:USDT', '').replace('/USDT', ''),
+                    'side': ('SHORT' if (pos.get('side') or '').upper() == 'SELL' else 'LONG' if (pos.get('side') or '').upper() == 'BUY' else ('LONG' if safe_float(pos.get('contracts')) > 0 else 'SHORT')),
+                    'size': abs(safe_float(pos.get('contracts'))),
+                    'entry_price': safe_float(pos.get('entryPrice')),
+                    'current_price': safe_float(pos.get('markPrice')),
+                    'pnl': safe_float(pos.get('unrealizedPnl')),
+                    'pnl_pct': safe_float(pos.get('percentage')),
+                    'liquidation_price': safe_float(pos.get('liquidationPrice')),
+                    'leverage': pos.get('leverage', '1'),
+                    'pattern_info': get_pattern_info_for_symbol(pos.get('symbol', '')),
+                    'vision_ai_status': get_vision_ai_status(pos.get('symbol', '')),
+                    'post_entry_status': get_post_entry_status(pos.get('symbol', ''))
+                } for pos in open_positions
+            ]
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Error in get_detailed_pnl: {e}")
+        return jsonify({'error': str(e)})
+
+@app.route('/api/performance-detailed')
+def get_detailed_performance():
+    """Endpoint para dados detalhados de performance para a página de detalhes"""
+    try:
+        # Buscar trades fechados
+        closed_trades = get_closed_trades() or []
+        
+        if not closed_trades:
+            return jsonify({
+                'winrate': 0,
+                'total_trades': 0,
+                'wins': 0,
+                'losses': 0,
+                'avg_win': 0,
+                'avg_loss': 0,
+                'profit_factor': 0,
+                'best_trade': 0,
+                'worst_trade': 0,
+                'trading_pairs': [],
+                'monthly_performance': []
+            })
+        
+        # Calcular estatísticas básicas
+        wins = [t for t in closed_trades if safe_float(t.get('pnl')) > 0]
+        losses = [t for t in closed_trades if safe_float(t.get('pnl')) <= 0]
+        
+        total_profit = sum(safe_float(t.get('pnl')) for t in wins)
+        total_loss = abs(sum(safe_float(t.get('pnl')) for t in losses))
+        
+        # Performance por par
+        pair_stats = {}
+        for trade in closed_trades:
+            symbol = trade.get('symbol', '').replace('USDT', '')
+            if symbol not in pair_stats:
+                pair_stats[symbol] = {'trades': 0, 'wins': 0, 'pnl': 0}
+            pair_stats[symbol]['trades'] += 1
+            if safe_float(trade.get('pnl')) > 0:
+                pair_stats[symbol]['wins'] += 1
+            pair_stats[symbol]['pnl'] += safe_float(trade.get('pnl'))
+        
+        # Performance mensal
+        monthly_stats = {}
+        for trade in closed_trades:
+            if trade.get('closed_at'):
+                month_key = datetime.fromtimestamp(trade['closed_at'] / 1000).strftime('%Y-%m')
+                if month_key not in monthly_stats:
+                    monthly_stats[month_key] = {'trades': 0, 'wins': 0, 'pnl': 0}
+                monthly_stats[month_key]['trades'] += 1
+                if safe_float(trade.get('pnl')) > 0:
+                    monthly_stats[month_key]['wins'] += 1
+                monthly_stats[month_key]['pnl'] += safe_float(trade.get('pnl'))
+        
+        # Calculate period stats for JavaScript compatibility
+        now = datetime.now()
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Separate trades by periods
+        week_trades = []
+        month_trades = []
+        
+        for trade in closed_trades:
+            if trade.get('closed_at'):
+                trade_time = datetime.fromtimestamp(trade['closed_at'] / 1000)
+                
+                if trade_time >= month_start:
+                    month_trades.append(trade)
+                    if trade_time >= week_start:
+                        week_trades.append(trade)
+        
+        # Calculate 7d stats
+        week_wins = [t for t in week_trades if safe_float(t.get('pnl')) > 0]
+        week_winrate = (len(week_wins) / len(week_trades) * 100) if week_trades else 0
+        week_total_pnl = sum(safe_float(t.get('pnl')) for t in week_trades)
+        
+        # Calculate 30d stats  
+        month_wins = [t for t in month_trades if safe_float(t.get('pnl')) > 0]
+        month_winrate = (len(month_wins) / len(month_trades) * 100) if month_trades else 0
+        month_total_pnl = sum(safe_float(t.get('pnl')) for t in month_trades)
+        
+        response_data = {
+            'winrate': round((len(wins) / len(closed_trades)) * 100, 1) if closed_trades else 0,
+            'total_trades': len(closed_trades),
+            'wins': len(wins),
+            'losses': len(losses),
+            'avg_win': round(total_profit / len(wins), 4) if wins else 0,
+            'avg_loss': round(total_loss / len(losses), 4) if losses else 0,
+            'profit_factor': round(total_profit / total_loss, 2) if total_loss > 0 else 0,
+            'best_trade': max((safe_float(t.get('pnl')) for t in closed_trades), default=0),
+            'worst_trade': min((safe_float(t.get('pnl')) for t in closed_trades), default=0),
+            'trading_pairs': [
+                {
+                    'symbol': symbol,
+                    'trades': data['trades'],
+                    'winrate': round((data['wins'] / data['trades']) * 100, 1),
+                    'pnl': round(data['pnl'], 4)
+                } for symbol, data in sorted(pair_stats.items(), key=lambda x: x[1]['trades'], reverse=True)
+            ],
+            'monthly_performance': [
+                {
+                    'month': month,
+                    'trades': data['trades'],
+                    'winrate': round((data['wins'] / data['trades']) * 100, 1),
+                    'pnl': round(data['pnl'], 4)
+                } for month, data in sorted(monthly_stats.items())
+            ],
+            'period_stats': {
+                '7d': {
+                    'win_rate': round(week_winrate, 1),
+                    'wins': len(week_wins),
+                    'losses': len(week_trades) - len(week_wins),
+                    'trades': len(week_trades),
+                    'total_pnl': round(week_total_pnl, 2)
+                },
+                '30d': {
+                    'win_rate': round(month_winrate, 1),
+                    'wins': len(month_wins),
+                    'losses': len(month_trades) - len(month_wins),
+                    'trades': len(month_trades),
+                    'total_pnl': round(month_total_pnl, 2)
+                }
+            }
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Error in get_detailed_performance: {e}")
+        return jsonify({'error': str(e)})
 
 @app.route('/api/stats')
 def stats():

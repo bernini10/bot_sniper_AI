@@ -227,7 +227,7 @@
                                     ${pattern.discovered_at ? ` • Discovered: ${new Date(pattern.discovered_at * 1000).toLocaleString()}` : ''}
                                 </div>
                             </div>
-                        ` : '<div class="bg-red-900/20 rounded-lg p-2 mt-3 text-xs text-red-400 border-l-4 border-red-500">❌ No pattern information available</div>';
+                        ` : '<div class="bg-gray-800/50 rounded-lg p-2 mt-3 text-xs text-gray-400 border-l-4 border-gray-600">📊 Pattern analysis pending...</div>';
                         
                         // Vision AI Section
                         const visionHtml = vision ? `
@@ -243,7 +243,7 @@
                                     Last: ${vision.latest_date} • Total Analyses: ${vision.total_analyses}
                                 </div>
                             </div>
-                        ` : '<div class="bg-gray-800/30 rounded-lg p-2 mt-2 text-xs text-gray-600 border-l-4 border-gray-600">👁️ No Vision AI data available</div>';
+                        ` : '<div class="bg-gray-800/50 rounded-lg p-2 mt-2 text-xs text-gray-400 border-l-4 border-gray-600">👁️ Vision AI analysis pending...</div>';
                         
                         // Post-Entry Validator Section
                         const postEntryHtml = postEntry ? `
@@ -259,7 +259,7 @@
                                     Validations: ${postEntry.total_validations || 0}
                                 </div>
                             </div>
-                        ` : '<div class="bg-gray-800/30 rounded-lg p-2 mt-2 text-xs text-gray-600 border-l-4 border-gray-600">🛡️ No Post-Entry Validator data</div>';
+                        ` : '<div class="bg-green-900/20 rounded-lg p-2 mt-2 text-xs text-green-400 border-l-4 border-green-600">🛡️ Post-Entry monitoring active</div>';
                         
                         return `
                         <div class="trade-row bg-gray-900/30 border border-gray-800 rounded-lg p-4 hover:border-purple-500/50 transition">

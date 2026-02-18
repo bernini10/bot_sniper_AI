@@ -178,44 +178,56 @@
 
         async function loadData() {
             try {
+                console.log('🔄 Loading performance data...');
                 const res = await fetch('/api/performance-detailed');
                 const data = await res.json();
+                
+                console.log('📊 Performance data received:', data);
                 
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
+                // Verificar se period_stats existe
+                if (!data.period_stats) {
+                    throw new Error('period_stats missing from API response');
+                }
+
                 const stats7d = data.period_stats['7d'] || {};
                 const stats30d = data.period_stats['30d'] || {};
+                
+                console.log('✅ 7d stats:', stats7d);
+                console.log('✅ 30d stats:', stats30d);
 
                 // Update 7d metrics
-                document.getElementById('wr-7d').innerText = stats7d.win_rate + '%';
-                document.getElementById('wr-7d').className = 'text-5xl font-black mb-2 ' + getWinRateColor(stats7d.win_rate);
+                document.getElementById('wr-7d').innerText = (stats7d.win_rate || 0) + '%';
+                document.getElementById('wr-7d').className = 'text-5xl font-black mb-2 ' + getWinRateColor(stats7d.win_rate || 0);
                 document.getElementById('wins-7d').innerText = stats7d.wins || 0;
                 document.getElementById('losses-7d').innerText = stats7d.losses || 0;
-                document.getElementById('total-pnl-7d').innerHTML = formatPnL(stats7d.total_pnl);
-                document.getElementById('total-trades-7d').innerText = stats7d.total_trades || 0;
+                document.getElementById('total-pnl-7d').innerHTML = formatPnL(stats7d.total_pnl || 0);
+                document.getElementById('total-trades-7d').innerText = stats7d.trades || 0;  // CORRIGIDO: trades, não total_trades
 
                 // Update 30d metrics
-                document.getElementById('wr-30d').innerText = stats30d.win_rate + '%';
-                document.getElementById('wr-30d').className = 'text-5xl font-black mb-2 ' + getWinRateColor(stats30d.win_rate);
+                document.getElementById('wr-30d').innerText = (stats30d.win_rate || 0) + '%';
+                document.getElementById('wr-30d').className = 'text-5xl font-black mb-2 ' + getWinRateColor(stats30d.win_rate || 0);
                 document.getElementById('wins-30d').innerText = stats30d.wins || 0;
                 document.getElementById('losses-30d').innerText = stats30d.losses || 0;
-                document.getElementById('total-pnl-30d').innerHTML = formatPnL(stats30d.total_pnl);
-                document.getElementById('total-trades-30d').innerText = stats30d.total_trades || 0;
+                document.getElementById('total-pnl-30d').innerHTML = formatPnL(stats30d.total_pnl || 0);
+                document.getElementById('total-trades-30d').innerText = stats30d.trades || 0;  // CORRIGIDO: trades, não total_trades
 
-                // Update advanced metrics
-                document.getElementById('avg-win-30d').innerHTML = formatPnL(stats30d.avg_win);
-                document.getElementById('avg-loss-30d').innerHTML = formatPnL(stats30d.avg_loss);
-                document.getElementById('best-trade-30d').innerHTML = formatPnL(stats30d.best_trade);
-                document.getElementById('worst-trade-30d').innerHTML = formatPnL(stats30d.worst_trade);
+                // Update advanced metrics (dados estão no nível raiz, não em stats30d)
+                document.getElementById('avg-win-30d').innerHTML = formatPnL(data.avg_win || 0);
+                document.getElementById('avg-loss-30d').innerHTML = formatPnL(data.avg_loss || 0);
+                document.getElementById('best-trade-30d').innerHTML = formatPnL(data.best_trade || 0);
+                document.getElementById('worst-trade-30d').innerHTML = formatPnL(data.worst_trade || 0);
 
-                // Update top symbols
+                // Update top symbols (trading_pairs, não symbol_breakdown)
                 const symbolsGrid = document.getElementById('top-symbols-grid');
-                if (data.symbol_breakdown.length === 0) {
+                const tradingPairs = data.trading_pairs || [];
+                if (tradingPairs.length === 0) {
                     symbolsGrid.innerHTML = '<div class="text-center py-8 text-gray-600 col-span-full">No symbol data available</div>';
                 } else {
-                    symbolsGrid.innerHTML = data.symbol_breakdown.map((symbol, index) => {
+                    symbolsGrid.innerHTML = tradingPairs.map((symbol, index) => {
                         const isProfitable = symbol.pnl > 0;
                         const borderColor = isProfitable ? 'border-green-500' : 'border-red-500';
                         const bgColor = isProfitable ? 'bg-green-500/5' : 'bg-red-500/5';
