@@ -1,241 +1,297 @@
-# 🦅 Bot Sniper Bybit v2.4.0 - Continuous Learning Edition
+# 🤖 bot_sniper_AI - Multi-Exchange AI Trading Bot with End-to-End Learning
 
-Um sistema de trading algorítmico de alta performance para o mercado de futuros de criptomoedas, equipado com **Inteligência Artificial que aprende continuamente** com os próprios resultados. Arquitetura modular, gestão de risco profissional, validação por IA de visão e sistema de feedback loop completo.
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/bernini10/bot_sniper_AI?style=social)](https://github.com/bernini10/bot_sniper_AI/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/bernini10/bot_sniper_AI?style=social)](https://github.com/bernini10/bot_sniper_AI/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/bernini10/bot_sniper_AI)](https://github.com/bernini10/bot_sniper_AI/issues)
+[![End-to-End Learning](https://img.shields.io/badge/ML-End--to--End-orange)](https://github.com/bernini10/bot_sniper_AI#-end-to-end-learning-system)
+[![Trading](https://img.shields.io/badge/Trading-Algorithmic-blueviolet)](https://github.com/bernini10/bot_sniper_AI#-algorithmic-trading)
+[![Bybit](https://img.shields.io/badge/Exchange-Bybit-yellow)](https://www.bybit.com)
+[![Multi-Exchange](https://img.shields.io/badge/Multi--Exchange-ready-success)](https://github.com/bernini10/bot_sniper_AI#-multi-exchange-support)
 
-## 🧠 Nova Era: IA que Aprende com Experiência
+> **🚀 Sistema completo de trading algorítmico com aprendizado end-to-end que aprende com trades REAIS, não simulações.**
 
-### Sistema de Aprendizado Contínuo (v2.4.0)
-*   **Feedback Loop Completo:** Conecta predições da IA com resultados reais de P&L
-*   **Treinamento Incremental:** Modelo evolui automaticamente preservando conhecimento anterior  
-*   **Confiança Adaptiva:** IA ajusta confiança dos padrões baseado em performance histórica
-*   **Auto-Otimização:** Padrões ruins perdem peso, bons ganham força automaticamente
+## 📋 Table of Contents
+- [✨ Features](#-features)
+- [🧠 End-to-End Learning System](#-end-to-end-learning-system)
+- [🚀 Quick Start](#-quick-start)
+- [📊 Dashboard](#-dashboard)
+- [🏗️ Architecture](#️-architecture)
+- [🤝 Community & Contributing](#-community--contributing)
+- [💰 Sponsorship](#-sponsorship)
+- [📈 Performance](#-performance)
+- [📚 Documentation](#-documentation)
+- [📄 License](#-license)
 
-### Performance Tracking & Analytics
-*   **Base de Performance:** 6,800+ amostras coletadas com resultados reais
-*   **Métricas por Padrão:** Taxa de sucesso, P&L médio, duração por tipo de setup
-*   **Ajuste Automático:** Pesos dos padrões se adaptam baseado em histórico de acertos
-*   **Compactação Inteligente:** Preserva dados importantes, arquiva histórico antigo
+## ✨ Features
 
-## 🚀 Funcionalidades Principais
+### 🤖 **AI-Powered Trading**
+- **🧠 End-to-End Learning**: Real-time learning from actual trades (not simulations)
+- **🔍 Pattern Recognition**: 11+ technical patterns across multiple timeframes
+- **📊 Market Context**: BTC.D validation with 5 market scenarios
+- **⚡ Real-time Execution**: Direct integration with Bybit API
 
-### Core System
-*   **Arquitetura "Hunter-Killer":**
-    *   `Scanner`: Varredura contínua de 30+ pares em múltiplos timeframes + **coleta 24/7** para IA
-    *   `Monitor`: Vigia de preço "Just-in-Time" com **validação por Vision AI**
-    *   `Executor`: Módulo "Fire-and-Forget" com **proteção anti-duplicação** e feedback automático
+### 🛡️ **Risk Management**
+- **🎯 Protocolo Severino**: Rigorous methodology for safe trading
+- **📉 Dynamic Stop-Loss**: Auto-adjusting based on market volatility
+- **📈 Position Sizing**: Intelligent capital allocation
+- **🔒 Post-Entry Validation**: Vision AI validation after entry
 
-### 🛡️ Risk Management & Capital Defense
-*   **Gestão de Risco Profissional:**
-    *   Cálculo de lote baseado em risco fixo (1.5-5% da banca por trade)
-    *   **Proteção contra múltiplas entradas** no mesmo ativo (bug corrigido v2.4.0)
-*   **Break-Even Automático:** Move o Stop para entrada ao atingir 25% do alvo
-*   **Proteção de Liquidação:** Ajuste automático de Stop Loss se muito próximo da liquidação
-*   **Filtro de Correlação:** Sistema BTC/BTC.D com 5 cenários de mercado
+### 🔧 **Technical Excellence**
+- **🐍 Python 3.8+**: Modern, maintainable codebase
+- **📁 Modular Architecture**: Easy to extend and customize
+- **📊 Real-time Dashboard**: Live monitoring and analytics
+- **🔌 Multi-Exchange Ready**: Architecture supports multiple exchanges
 
-### 🎯 Vision AI Integration (v2.3.0 → v2.4.0)
-*   **Validação Gráfica:** Google Gemini/GPT-4o analisa gráficos antes de aprovar trades
-*   **Confiança Melhorada:** Sistema combina confiança técnica + histórico de performance
-*   **Rejeição Inteligente:** IA identifica "falsos rompimentos" e remove da watchlist
-*   **Feedback Contínuo:** Cada resultado real alimenta o modelo de confiança
+## 🧠 End-to-End Learning System
 
-## ⚡ NEW in v2.4.0 - Continuous Learning System
-
-### 🔄 Sistema de Feedback Loop Completo
-
-#### Brain Performance Tracker
-*   **Conexão Predição ↔ Resultado:** Liga cada análise da IA com o P&L real do trade
-*   **Métricas Detalhadas:** Success rate, P&L médio, duração por padrão
-*   **Histórico Completo:** Base de dados rastreando 100+ trades com performance real
-
-#### Continuous Learning Engine  
-*   **Treinamento Incremental:** Modelo treina automaticamente a cada 50+ novos dados
-*   **Preservação de Conhecimento:** Nunca "esquece" aprendizado anterior
-*   **Adaptação de Pesos:** Padrões com baixa performance perdem influência automaticamente
-*   **Validação de Melhorias:** Só aplica novos modelos se houver melhoria real (>5%)
-
-#### Enhanced Vision Confidence
-*   **Multiplicadores Adaptativos:** IA ajusta confiança baseada em histórico do padrão
-*   **Exemplo:** BANDEIRA_ALTA que falhou 3x seguidas tem confiança reduzida para 0.3x
-*   **Auto-Correção:** Padrões com alta taxa de sucesso ganham boost de confiança (1.5x)
-
-### 📊 Coleta Contínua de Dados
-*   **Modo 24/7:** Scanner coleta dados mesmo com watchlist cheia (não para mais)
-*   **Separação Lógica:** Coleta para IA ≠ Trading ativo
-*   **Volume Massivo:** ~100-200 novas amostras por dia vs. ~10-20 anterior
-*   **Rate Limit Inteligente:** Delays dinâmicos para não sobrecarregar APIs
-
-### 🔧 Sistema de Manutenção Automática
-*   **Compactação Inteligente:** Preserva dados válidos, arquiva inválidos antigos
-*   **Limpeza de Imagens:** Remove gráficos antigos mantendo os de padrões válidos  
-*   **Auto-Execução:** Roda automaticamente a cada 12h sem intervenção
-*   **Rotação de Logs:** Histórico preservado mas compactado para economizar espaço
-
-## 📈 Padrões Suportados & Performance
-
-| Padrão | Amostras | Taxa Sucesso* | Confiança Base | Status IA |
-|--------|----------|---------------|----------------|-----------|
-| OCO | 1,987 | ~65% | 0.80 | ✅ Otimizado |
-| TOPO_DUPLO | 1,384 | ~58% | 0.75 | ✅ Ajustado |
-| CUNHA_ASCENDENTE | 1,155 | ~52% | 0.68 | ⚖️ Monitorado |
-| OCO_INVERTIDO | 906 | ~61% | 0.80 | ✅ Otimizado |
-| FUNDO_DUPLO | 654 | ~55% | 0.75 | ✅ Ajustado |
-| BANDEIRA_ALTA | 15 | ~40%** | 0.70→0.42 | ⚠️ Penalizado |
-| TRIANGULO_* | 510 | ~49% | 0.72 | ⚖️ Em Análise |
-
-*\* Performance histórica baseada em Vision AI + resultados reais*  
-*\*\* BANDEIRA_ALTA sofreu penalização após incidente AAVE (-10 USDT)*
-
-## 🎯 Fluxo Operacional Atualizado
+### 🎯 **What Makes Us Different?**
+Unlike most trading bots that use **simulated data**, bot_sniper_AI learns from **REAL trades**:
 
 ```
-📡 Scanner (24/7)
-    ├── Detecta Padrão
-    ├── 🧠 SEMPRE: Coleta para IA (brain_collector)
-    ├── ✅ Se Watchlist tem slot: Envia para Monitor
-    └── ❌ Se cheia: Só coleta (não tradea)
-
-👁️ Monitor + Vision AI
-    ├── Recebe padrão da watchlist
-    ├── Gera gráfico automaticamente  
-    ├── 🤖 IA analisa: VALID/INVALID (confiança melhorada)
-    ├── ✅ Se VALID: Mantém na watchlist
-    └── ❌ Se INVALID: Remove + blacklist 6h
-
-⚡ Executor (Fire & Forget)
-    ├── 🛡️ Verifica: Posição já existe? (anti-duplicação)
-    ├── 💰 Calcula: Tamanho baseado em risco
-    ├── 🎯 Executa: Ordem a mercado
-    ├── 🛡️ Define: Stop Loss + Take Profit
-    └── 📊 Registra: Feedback para IA (ao fechar)
-
-🧠 Continuous Learning (Background)
-    ├── 🔄 A cada 12h: Processa novos feedbacks
-    ├── 🎯 A cada 50+ dados: Retreina modelo
-    ├── 📊 Atualiza: Pesos e confiança por padrão
-    └── 🗄️ Arquiva: Dados antigos mantendo essenciais
+SCANNER → [Patterns] → MONITOR + BRAIN → [Decisions] → EXECUTOR → [Real Trades] → FEEDBACK REAL → BRAIN LEARNING
 ```
 
-## ⚙️ Configuração & Setup
+### 📊 **3-Phase Learning System**
 
-### Pré-requisitos
-*   Python 3.8+
-*   Chaves API Bybit (Futures)
-*   Google API Key (Gemini Pro Vision)
-*   Servidor com IP público (para webhooks TradingView)
+#### **✅ Phase 1: Integration Restoration**
+- `bot_monitor_v2_with_brain.py` - Integrated monitor with learning system
+- Real-time brain integration with trading decisions
+- Unified scanner → monitor → brain → executor pipeline
 
-### Instalação Rápida
+#### **✅ Phase 2: Real-Time Learning**
+- `realtime_feedback_collector.py` - Collects REAL feedback from Bybit API
+- Database automatically updated with `trade_result`, `reward`, `brain_decision`
+- Brain learns from actual wins/losses (not simulations)
+
+#### **✅ Phase 3: Auto-Optimization**
+- `data_compactor.py` - Intelligent data compression preserving learning
+- Auto-adjusting weights and counter-weights
+- Continuous scanner feeding the model
+
+### 🔬 **Technical Implementation**
+- **Q-Learning with Experience Replay**
+- **Neural Network**: 10 features → 64 → 64 → 3 actions (BUY/SELL/HOLD)
+- **Training**: Incremental every 30 minutes
+- **Memory**: 10,000 experiences (FIFO buffer)
+- **Features**: Pattern confidence, market context, historical success
+
+## 🚀 Quick Start
+
+### 📦 **Prerequisites**
 ```bash
-git clone https://github.com/bernini10/bot_sniper_bybit.git
-cd bot_sniper_bybit
+Python 3.8+
+Bybit API Key (for real trading)
+Google Gemini API Key (for Vision AI)
+```
+
+### 🔧 **Installation**
+```bash
+# Clone repository
+git clone https://github.com/bernini10/bot_sniper_AI.git
+cd bot_sniper_AI
+
+# Install dependencies
 pip install -r requirements.txt
 
-# Configurar chaves (copie .env.example para .env)
+# Configure environment
 cp .env.example .env
-nano .env
+# Edit .env with your API keys
 
-# Inicializar sistema de IA
-python3 brain_initialization.py --mode full
-
-# Iniciar sistema completo
-./restart_system_v2.3.1.sh
+# Initialize brain system
+python3 setup_brain_system.py
 ```
 
-### Configuração do Vision AI
-1. **Google API:** Obtenha chave em [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. **Adicione ao .env:**
-   ```
-   GOOGLE_API_KEY=sua_chave_aqui
-   ```
-3. **Teste:** `python3 vision_validator.py` (deve processar amostras pendentes)
-
-## 📊 Dashboard & Monitoramento
-
-### Interface Web (Dashboard v2.3.0)
-*   **URL:** `http://SEU_IP:5000`
-*   **Watchlist:** Padrões ativos com status da Vision AI
-*   **Performance:** Métricas de P&L por padrão
-*   **Trades:** Histórico completo com detalhes
-*   **Vision:** Seletor manual de validação por IA
-
-### Logs & Debug
+### 🏃 **Running the System**
 ```bash
-# Logs principais
-tail -f scanner_bybit.log      # Padrões detectados
-tail -f monitor_bybit.log      # Validações da IA
-tail -f vision.log             # Análises gráficas
-tail -f brain_initialization.log  # Sistema de aprendizado
+# Start complete end-to-end system
+./launch_end_to_end_system.sh
 
-# Status do sistema
-python3 brain_initialization.py --mode status
+# Or start components individually:
+# 1. Brain Learning Daemon
+python3 -c "from brain_integration import BrainIntegration; brain = BrainIntegration(); brain.initialize(); brain.continuous_learning(30)"
+
+# 2. Feedback Collector
+python3 realtime_feedback_collector.py
+
+# 3. Integrated Monitor
+python3 bot_monitor_v2_with_brain.py
+
+# 4. Dashboard
+python3 dashboard_server.py
 ```
 
-### Métricas de Performance
-```bash
-# Relatório completo de IA
-python3 -c "
-from brain_performance_tracker import performance_tracker
-summary = performance_tracker.get_performance_summary()
-print(f'Taxa Sucesso: {summary[\"general\"][\"success_rate\"]:.1%}')
-print(f'P&L Total: {summary[\"general\"][\"total_pnl\"]:.3f} USDT')
-print(f'Feedbacks: {summary[\"general\"][\"total_feedback\"]}')
-"
+## 📊 Dashboard
+
+Access the real-time dashboard at: `http://localhost:8080`
+
+### 📈 **Dashboard Features:**
+- **Real-time Positions**: Live tracking of open trades
+- **Performance Metrics**: Win rate, Sharpe ratio, P&L
+- **Brain Learning Stats**: Training progress, memory usage
+- **Market Context**: BTC.D dominance, market scenarios
+- **Pattern Watchlist**: Active patterns with confidence scores
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph "📡 Data Collection"
+        A[Market Scanner] --> B[Pattern Detection]
+        B --> C[Watchlist Management]
+    end
+    
+    subgraph "🧠 AI Learning"
+        D[Brain Integration] --> E[Q-Learning Model]
+        E --> F[Real-time Decisions]
+        G[Feedback Collector] --> H[Bybit API Real Data]
+        H --> I[Database Updates]
+    end
+    
+    subgraph "⚡ Execution"
+        J[Integrated Monitor] --> K[Decision Engine]
+        K --> L[Bybit Executor]
+        L --> M[Real Trades]
+    end
+    
+    subgraph "🔧 Optimization"
+        N[Auto Optimizer] --> O[Weight Adjustment]
+        O --> P[Data Compression]
+        P --> Q[System Adaptation]
+    end
+    
+    C --> D
+    F --> J
+    I --> E
+    M --> G
+    Q --> D
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style D fill:#bbf,stroke:#333,stroke-width:2px
+    style J fill:#9f9,stroke:#333,stroke-width:2px
+    style N fill:#ff9,stroke:#333,stroke-width:2px
 ```
 
-## 🔄 Próximos Passos (Roadmap v2.5.0+)
+## 🤝 Community & Contributing
 
-### 🎯 Em Desenvolvimento
-*   **Backtesting Inteligente:** Simulação usando dados históricos + IA treinada
-*   **Multi-Exchange:** Expansão para Binance, OKX com arbitragem de padrões
-*   **Risk Scaling:** Aumento automático de posição baseado em streak de acertos
-*   **Portfolio Balance:** Diversificação automática entre setores (DeFi, L1, Gaming, etc)
+### 🌍 **We're Looking For:**
+- **🔬 ML Researchers** for trading algorithms
+- **💻 Python Developers** for core improvements
+- **📊 Traders** for testing and real-world feedback
+- **🎓 Academics** for case studies and research
+- **🤝 Partners** to expand the project
 
-### 🧠 Melhorias de IA
-*   **Vision AI 2.0:** Modelo próprio treinado especificamente em padrões crypto
-*   **Sentiment Analysis:** Integração com feeds de notícias e redes sociais
-*   **Market Regime Detection:** Identificação automática de bull/bear/crab markets
-*   **Ensemble Models:** Combinação de múltiplos modelos para maior precisão
+### 🎯 **How to Contribute:**
+1. **⭐ Star the repository** - Helps with visibility!
+2. **🐛 Report issues** - Found a bug? Let us know!
+3. **💡 Suggest features** - What would make bot_sniper_AI better?
+4. **🔬 Submit PRs** - Code contributions welcome!
+5. **📊 Share results** - How are you using the bot?
 
-### ⚡ Performance & Scale
-*   **GPU Acceleration:** Treinamento de modelos em GPU para responses mais rápidas
-*   **Distributed Architecture:** Multi-nodes para maior capacidade de processamento
-*   **Real-Time WebSocket:** Atualizações instantâneas no dashboard
-*   **Mobile Alerts:** App mobile para notificações push
+### 📝 **Contribution Guidelines:**
+- Read our [CONTRIBUTING.md](CONTRIBUTING.md) (to be created)
+- Follow [Protocolo Severino](PROTOCOLO-SEVERINO.md) methodology
+- Test your changes thoroughly
+- Document new features
 
-### 🛡️ Risk & Safety
-*   **Stress Testing:** Simulação de cenários extremos de mercado
-*   **Position Correlation:** Análise de correlação entre posições ativas
-*   **Dynamic Risk:** Ajuste automático de risco baseado em volatilidade
-*   **Emergency Protocols:** Fechamento automático em cenários de crise
+## 💰 Sponsorship
 
-## 🏆 Resultados & Conquistas
+### 🏆 **Support the Project**
+bot_sniper_AI is developed with rigorous methodology and real-world testing. Your sponsorship helps:
 
-### v2.4.0 Achievements
-*   ✅ **Bug Crítico Resolvido:** Múltiplas entradas no mesmo ativo (caso AAVE)
-*   ✅ **IA Implementada:** Sistema de feedback loop funcionando 24/7
-*   ✅ **Performance Tracking:** 6,874+ amostras com resultados reais
-*   ✅ **Auto-Otimização:** Padrões se ajustam automaticamente baseado em performance
-*   ✅ **Coleta Massiva:** 10x mais dados coletados para treinamento da IA
+- **🚀 Accelerate development** of new features
+- **🔬 Fund research** in ML for trading
+- **📚 Create educational content** for the community
+- **🛠️ Maintain infrastructure** for testing
 
-### Próximos Milestones
-*   🎯 **1,000 Feedbacks:** Primeira grande análise de performance (ETA: 2 semanas)
-*   🎯 **Modelo v2.0.0:** Primeiro retreino significativo com performance melhorada
-*   🎯 **Taxa 70%+:** Objetivo de taxa de sucesso acima de 70% em padrões principais
-*   🎯 **ROI Tracking:** Implementação de tracking de ROI por período
+### 💎 **Sponsorship Tiers:**
+```
+🥉 Supporter: $5/month
+  • Name in README sponsors section
+  • Access to monthly updates
 
-## 📞 Suporte & Comunidade
+🥈 Contributor: $15/month
+  • Early access to new features
+  • Voting on roadmap priorities
+  • Special Discord role
 
-*   **GitHub Issues:** [Reportar bugs/sugestões](https://github.com/bernini10/bot_sniper_bybit/issues)
-*   **Documentação:** Consulte os arquivos `.md` para detalhes técnicos
-*   **Updates:** Acompanhe releases no GitHub para novas versões
+🥇 Sponsor: $50/month
+  • Personalized consulting sessions
+  • Priority support
+  • Custom feature requests
+
+💎 Enterprise: $200/month
+  • Custom exchange integrations
+  • Dedicated support channel
+  • White-label solutions
+```
+
+### 🌐 **Sponsorship Platforms:**
+- **GitHub Sponsors**: [Sponsor bernini10](https://github.com/sponsors/bernini10)
+- **Open Collective**: (Coming soon)
+- **Patreon**: (Coming soon)
+
+## 📈 Performance
+
+### 📊 **Current Statistics:**
+- **Database Samples**: 6,669+ patterns in `raw_samples`
+- **Pattern Images**: 6,000+ technical patterns detected
+- **Real Trades**: Learning from actual Bybit executions
+- **Win Rate**: Continuously monitored and optimized
+- **Sharpe Ratio**: Auto-calculated and tracked
+
+### 🎯 **Learning Progress:**
+- **Training Cycles**: Continuous (30-minute intervals)
+- **Experience Memory**: 10,000 capacity
+- **Model Convergence**: Monitored via metrics
+- **Error Reduction**: Tracked via TensorBoard logs
+
+## 📚 Documentation
+
+### 📖 **Complete Documentation:**
+- [🧠 End-to-End Diagram](END_TO_END_DIAGRAM.md) - Complete system flow
+- [📊 Investor Report](RELATORIO_INVESTIDORES_v2.4.0.md) - Detailed system analysis
+- [🏗️ Brain Architecture](brain_architecture.md) - AI system design
+- [🔧 Integration Guide](INTEGRATION_GUIDE.md) - How to integrate
+- [📈 System Status](SYSTEM_STATUS.md) - Current status and metrics
+
+### 🎓 **Educational Resources:**
+- **Jupyter Notebooks**: (Coming soon)
+- **Video Tutorials**: (Coming soon)
+- **Academic Papers**: (Coming soon)
+- **Case Studies**: (Coming soon)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### 🤝 **Open Source Philosophy:**
+We believe in:
+- **Transparency** in algorithmic trading
+- **Education** through open source
+- **Collaboration** with the community
+- **Innovation** through shared knowledge
 
 ---
 
-## ⚠️ Disclaimer
+## 🚀 Get Started Today!
 
-Este software é fornecido "como está" para fins educacionais e de pesquisa. Trading de criptomoedas envolve risco significativo de perda financeira. Use apenas capital que pode perder. Teste sempre em conta demo primeiro. Os desenvolvedores não se responsabilizam por perdas financeiras.
+1. **⭐ Star the repository** to show your support
+2. **🐛 Check open issues** to see where you can help
+3. **💬 Join discussions** to share ideas
+4. **🔧 Try the bot** with paper trading first
+5. **🤝 Consider sponsoring** to support development
 
-**Versão:** v2.4.0-continuous-learning-system  
-**Última Atualização:** Fevereiro 2026  
-**Licença:** MIT  
-**Python:** 3.8+  
-**Status:** 🟢 Produção Estável com IA Ativa
+**📞 Questions? Issues? Suggestions?**
+- GitHub Issues: [Report here](https://github.com/bernini10/bot_sniper_AI/issues)
+- GitHub Discussions: [Join conversation](https://github.com/bernini10/bot_sniper_AI/discussions)
+- Email: bernini10@gmail.com
+
+---
+
+**🎯 Developed with:** Rigor, precision, and deep investigation (Protocolo Severino)  
+**🚀 Version:** v2.5.0 End-to-End Learning System  
+**📅 Last Updated:** 2026-02-17  
+
+*"True learning comes not from simulation, but from the reality of trades." - Protocolo Severino*

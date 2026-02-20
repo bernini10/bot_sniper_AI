@@ -1,0 +1,236 @@
+# TASKS.SEVERINO - Plano de Evolução do Sistema Trading
+# Criado: 2026-02-17 22:58 UTC
+# Autor: Severino (Assistente Trading Sênior)
+# Status: AGUARDANDO IMPLEMENTAÇÃO
+
+## 📊 RESUMO DA SITUAÇÃO ATUAL
+
+### ✅ SISTEMA OPERACIONAL (Nível 6/10)
+- Scanner → Brain → Executor → Vision AI → Dashboard
+- Correções aplicadas: Dashboard SHORT/LONG, API fallback, Telegram
+- Problema crítico resolvido: API Gemini bloqueada (3 keys vazadas)
+
+### ⚠️ PONTOS FRACOS IDENTIFICADOS
+1. Dependência crítica da API Gemini sem redundância real
+2. Processos não recarregam configurações em tempo real  
+3. Watchlist congestionada (10/10 slots)
+4. Treinamento interrompido durante falhas da API
+5. Single point of failure na validação Vision AI
+
+### 🚨 VULNERABILIDADES
+- API externa bloqueada = validação paralizada
+- Cache de configurações causa uso de versões antigas
+- Falta de circuit breaker durante falhas
+- Monitoramento reativo (detecta depois do problema)
+
+## 🚀 PLANO DE EVOLUÇÃO - PROJETO "SEVERINO RESILIENTE"
+
+### FASE 1: RESILIÊNCIA IMEDIATA (1-2 dias)
+**OBJETIVO:** Sistema nunca mais para por falha de API externa
+
+#### Tarefas:
+1. **Circuit Breaker para Vision AI**
+   - Detecta falha em < 30 segundos
+   - Pausa entradas automaticamente durante falhas
+   - Notificação Telegram imediata
+
+2. **Sistema de cache local**
+   - Modelo simplificado (transformers) quando API offline
+   - Validação básica mantida durante falhas
+   - Capacidade reduzida mas operacional
+
+3. **Health checks proativos**
+   - Verifica API antes de cada validação
+   - Monitoramento contínuo da conectividade
+   - Logs detalhados de status da API
+
+4. **Hot reload de configurações**
+   - Processos recarregam .env sem restart
+   - Detecta mudanças na API key automaticamente
+   - Atualização em tempo real
+
+### FASE 2: REDUNDÂNCIA (3-5 dias)
+**OBJETIVO:** Multi-model AI com validação por consenso
+
+#### Tarefas:
+1. **Multi-model AI**
+   - Gemini + OpenAI + Local (transformers)
+   - Provedores alternativos configurados
+   - Custos otimizados por provedor
+
+2. **Validação por consenso**
+   - 2 de 3 modelos concordam = válido
+   - Sistema de votação ponderada
+   - Confiança baseada em histórico de acertos
+
+3. **Cache de validações**
+   - Padrões similares não precisam revalidar
+   - Banco de validações históricas
+   - Busca por similaridade de padrões
+
+4. **Fallback automático**
+   - Troca entre provedores sem intervenção
+   - Balanceamento de carga automático
+   - Failover transparente
+
+### FASE 3: OTIMIZAÇÃO (1 semana)
+**OBJETIVO:** Sistema mais inteligente e eficiente
+
+#### Tarefas:
+1. **Treinamento contínuo**
+   - Brain aprende mesmo durante falhas
+   - Dados offline processados quando online
+   - Aprendizado incremental constante
+
+2. **Dashboard preditivo**
+   - Mostra probabilidades antes de entrar
+   - Explica razões das recomendações
+   - Histórico similar de padrões
+
+3. **Scanner inteligente**
+   - Foca em padrões com melhor histórico
+   - Priorização por confiança esperada
+   - Filtragem proativa de ruído
+
+4. **Execução otimizada**
+   - Melhor timing baseado em volume/liquidez
+   - Slippage minimizada
+   - Ordem inteligente (market/limit)
+
+### FASE 4: AUTONOMIA (2 semanas)
+**OBJETIVO:** Sistema auto-gerenciável
+
+#### Tarefas:
+1. **Auto-diagnóstico**
+   - Detecta e corrige problemas sozinho
+   - Análise de logs automática
+   - Sugestões de correção
+
+2. **Auto-otimização**
+   - Ajusta parâmetros baseado em performance
+   - Otimização contínua de thresholds
+   - Aprendizado por reforço
+
+3. **Auto-recuperação**
+   - Reinicia componentes falhos automaticamente
+   - Recovery de estado após falhas
+   - Backup automático de configurações
+
+4. **Auto-aprendizado**
+   - Evolui estratégias baseado em resultados
+   - Adaptação a mudanças de mercado
+   - Geração de novas estratégias
+
+## 💡 IDEAÇÃO PARA EVOLUÇÃO RÁPIDA
+
+### PROJETO "SEVERINO RESILIENTE" (PRIORIDADE 1)
+```
+Sistema que:
+1. Detecta falha na API Gemini em < 30 segundos
+2. Troca para modelo local (transformers) automaticamente
+3. Notifica IMEDIATAMENTE via Telegram
+4. Continua operando com capacidade reduzida
+5. Retorna ao normal quando API restaurada
+```
+
+### PROJETO "BRAIN EVOLUTION" (PRIORIDADE 2)
+```
+Brain que:
+1. Aprende com TODOS os trades (ganhos e perdas)
+2. Desenvolve "intuição" sobre padrões específicos
+3. Ajusta confiança baseado em contexto de mercado
+4. Sugere ajustes nos parâmetros do scanner
+```
+
+### PROJETO "DASHBOARD PREDITIVO" (PRIORIDADE 3)
+```
+Dashboard que:
+1. Mostra probabilidade de sucesso ANTES de entrar
+2. Explica PORQUE recomenda/desrecomenda
+3. Mostra histórico similar de padrões
+4. Permite simulação de "e se" antes de executar
+```
+
+## 📝 PRÓXIMAS AÇÕES IMEDIATAS
+
+### PARA FAZER AGORA:
+1. [ ] Configurar API key de backup no sistema de fallback
+2. [ ] Testar circuito completo com API funcionando
+3. [ ] Verificar se padrões pendentes estão sendo validados
+4. [ ] Monitorar próximas entradas (agora validadas)
+
+### PARA IMPLEMENTAR EM SEQUÊNCIA:
+1. [ ] Fase 1 do Projeto "Severino Resiliente"
+2. [ ] Sistema de cache local para validação
+3. [ ] Circuit breaker automático
+4. [ ] Hot reload de configurações
+
+## 🎯 METAS DE PERFORMANCE
+
+### RESILIÊNCIA (Fase 1):
+- Uptime: 99.9% (nunca para por falha de API)
+- Tempo de detecção de falha: < 30 segundos
+- Tempo de notificação: < 10 segundos
+- Capacidade durante falhas: 70% da normal
+
+### PRECISÃO (Fase 2):
+- Validação por consenso: 95%+ acurácia
+- Redundância: 3 provedores independentes
+- Fallback automático: < 1 minuto
+- Cache hit rate: 80%+ para padrões similares
+
+### EFICIÊNCIA (Fase 3):
+- Tempo de análise: reduzido em 30%
+- Falsos positivos: reduzidos em 40%
+- Slippage média: < 0.1%
+- Win rate alvo: 65%+
+
+## 📊 MONITORAMENTO E METRICS
+
+### METRICS A RASTREAR:
+1. **Uptime da API Gemini** (disponibilidade)
+2. **Tempo de resposta da validação** (performance)
+3. **Taxa de cache hit** (eficiência)
+4. **Acurácia por provedor** (qualidade)
+5. **Tempo de fallback** (resiliência)
+6. **Win rate pós-validação** (resultados)
+
+### ALERTAS CONFIGURAR:
+1. API Gemini offline > 1 minuto
+2. Fallback ativado automaticamente
+3. Acurácia abaixo de 80%
+4. Tempo de resposta > 5 segundos
+5. Cache hit rate < 60%
+
+## 🔧 ARQUITETURA TÉCNICA PROPOSTA
+
+### COMPONENTES NOVOS:
+```
+1. api_health_monitor.py      # Monitoramento de APIs
+2. circuit_breaker.py         # Circuit breaker pattern
+3. local_validator.py         # Validação local (transformers)
+4. multi_model_orchestrator.py # Orquestração multi-model
+5. validation_cache.py        # Cache de validações
+6. hot_reload_manager.py      # Hot reload de configs
+```
+
+### INTEGRAÇÃO COM EXISTENTE:
+- Modificar post_entry_validator.py para usar circuit breaker
+- Atualizar vision_validator.py para multi-model
+- Extender dashboard_server.py para métricas
+- Integrar com sistema de fallback existente
+
+## 🚀 VISÃO FINAL
+
+**SISTEMA ALVO:** Trading autônomo, resiliente e auto-otimizável que:
+- Opera 24/7 sem dependência crítica externa
+- Aprende e evolui continuamente
+- Adapta-se a mudanças de mercado
+- Notifica proativamente sobre problemas
+- Toma decisões com alta confiança
+
+**PRÓXIMO PASSO:** Implementar Fase 1 (Resiliência Imediata)
+
+---
+*Documento mantido por Severino - Protocolo Ativo*
+*Última atualização: 2026-02-17 22:58 UTC*

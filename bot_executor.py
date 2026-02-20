@@ -5,7 +5,6 @@ import os
 import sys
 import argparse
 import logging
-import uuid
 from datetime import datetime
 from lib_utils import JsonManager
 from post_entry_validator import PostEntryValidator
@@ -74,56 +73,6 @@ class ExecutorBybit:
         for p in self.watchlist.get('pares', []):
             if p['symbol'] == symbol: return p
         return None
-    
-    def _get_brain_sample_id(self):
-        """
-        Busca o ID da amostra no banco de dados da IA correspondente ao padrão atual
-        Retorna None se não encontrar (mantém compatibilidade)
-        """
-        try:
-            import sqlite3
-            
-            symbol = self.symbol
-            pattern = self.alvo_dados.get('padrao', 'Unknown')
-            timeframe = self.alvo_dados.get('timeframe', '15m')
-            discovery_time = self.alvo_dados.get('timestamp_descoberta', 0)
-            
-            # Buscar amostra mais recente correspondente
-            db_path = os.path.join(BASE_DIR, 'sniper_brain.db')
-            if not os.path.exists(db_path):
-                logger.warning("⚠️ Banco de dados da IA não encontrado")
-                return None
-            
-            conn = sqlite3.connect(db_path)
-            c = conn.cursor()
-            
-            # Buscar amostra com mesmo símbolo, padrão e timeframe
-            # Ordenar por timestamp mais próximo do discovery_time
-            c.execute('''
-                SELECT id, timestamp_detection 
-                FROM raw_samples 
-                WHERE symbol = ? 
-                AND pattern_detected = ?
-                AND timeframe = ?
-                AND status = 'PROCESSED'
-                ORDER BY ABS(timestamp_detection - ?) ASC
-                LIMIT 1
-            ''', (symbol, pattern, timeframe, discovery_time))
-            
-            result = c.fetchone()
-            conn.close()
-            
-            if result:
-                sample_id = result[0]
-                logger.info(f"🧠 Conexão IA: Trade conectado com sample_id {sample_id}")
-                return sample_id
-            else:
-                logger.warning(f"⚠️ Nenhuma amostra da IA encontrada para {symbol} [{pattern}]")
-                return None
-                
-        except Exception as e:
-            logger.error(f"❌ Erro ao buscar brain_sample_id: {e}")
-            return None
 
     def calcular_posicao_risco(self, usdt_total, price, stop_price):
         """
@@ -227,10 +176,7 @@ class ExecutorBybit:
             order = self.exchange.create_order(self.target_symbol_final, 'market', side, amount_coins, params=params)
             logger.info(f"✅ Ordem executada: {order['id']}")
             
-            # === SEVERINO: Buscar brain_sample_id correspondente ===
-            brain_sample_id = self._get_brain_sample_id()
-            
-            self.registrar_entrada(price, amount_coins, usdt_total * RISK_PER_TRADE, brain_sample_id)
+            self.registrar_entrada(price, amount_coins, usdt_total * RISK_PER_TRADE)
             self.remover_da_watchlist("Trade Executado")
             
             # === SEVERINO: Criar validador pós-entrada ===
@@ -257,11 +203,7 @@ class ExecutorBybit:
             self.remover_da_watchlist("Erro de execução")
             sys.exit(1)
 
-    def registrar_entrada(self, entry_price, size, risco, brain_sample_id=None):
-        """
-        Registra entrada de trade com conexão para IA
-        Mantém compatibilidade com formato antigo
-        """
+    def registrar_entrada(self, entry_price, size, risco):
         try:
             history_file = os.path.join(BASE_DIR, 'trades_history.json')
             history = []
@@ -270,48 +212,17 @@ class ExecutorBybit:
                     try: history = json.load(f)
                     except: pass
             
-            # Gerar ID único para o trade
-            trade_id = str(uuid.uuid4())[:8]
-            
-            # Dados do padrão da watchlist
-            pattern_data = {
-                'pattern_name': self.alvo_dados.get('padrao', 'Unknown'),
-                'direction': self.alvo_dados.get('direcao', '').lower(),
-                'timeframe': self.alvo_dados.get('timeframe', '15m'),
-                'neckline': self.alvo_dados.get('neckline'),
-                'target': self.alvo_dados.get('target'),
-                'stop_loss': self.alvo_dados.get('stop_loss'),
-                'confiabilidade': self.alvo_dados.get('confiabilidade', 0)
-            }
-            
-            trade_record = {
-                # Campos originais (mantidos para compatibilidade)
+            history.append({
                 "symbol": self.symbol,
                 "side": self.alvo_dados['direcao'],
                 "entry_price": entry_price,
                 "size": size,
                 "risco_estimado": risco,
-                "opened_at": str(datetime.now()),  # String para display
-                "status": "OPEN",
-                
-                # Novos campos para sistema de feedback
-                "trade_id": trade_id,  # ID único
-                "opened_at_timestamp": int(time.time()),  # Timestamp numérico
-                "brain_sample_id": brain_sample_id,  # Conexão com predição da IA
-                "pattern_data": pattern_data,  # Dados completos do padrão
-                "version": "v2.5.0"  # Versão do formato
-            }
-            
-            history.append(trade_record)
-            
-            # Manter histórico limitado (últimos 100 trades)
-            with open(history_file, 'w') as f: 
-                json.dump(history[-100:], f, indent=2)
-            
-            logger.info(f"📝 Trade registrado: {trade_id} | Sample ID: {brain_sample_id or 'N/A'}")
-            
-        except Exception as e:
-            logger.error(f"❌ Erro ao registrar entrada: {e}")
+                "opened_at": str(datetime.now()),
+                "status": "OPEN"
+            })
+            with open(history_file, 'w') as f: json.dump(history[-50:], f, indent=2)
+        except: pass
 
     def monitorar_trailing_stop(self, side, entry_price):
         """
@@ -449,7 +360,7 @@ class ExecutorBybit:
                                     side=sl_side,
                                     amount=position_size,
                                     params={
-                                        'triggerPrice': str(new_sl),
+                                        'stopLoss': str(new_sl),
                                         'reduceOnly': True,
                                         'positionIdx': 0
                                     }

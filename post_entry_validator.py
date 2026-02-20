@@ -31,8 +31,16 @@ logger = logging.getLogger("PostEntryValidator")
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', '')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 
-# Google AI config
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
+# Importar sistema de fallback
+try:
+    from gemini_fallback import get_gemini_fallback
+    GEMINI_FALLBACK = get_gemini_fallback()
+    HAS_FALLBACK = True
+except ImportError:
+    # Fallback para sistema antigo
+    GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
+    GEMINI_FALLBACK = None
+    HAS_FALLBACK = False
 
 # Diretório de imagens
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -111,20 +119,47 @@ class PostEntryValidator:
         logger.info(f"👁️ Vision PostValidator v2.3.1 (Tolerante) inicializado: {symbol} | TF: {timeframe}")
 
     def _setup_gemini(self):
-        """Configura o modelo Gemini"""
+        """Configura o modelo Gemini com fallback"""
         self.gemini_model = None
-        if GOOGLE_API_KEY:
+        
+        if HAS_FALLBACK and GEMINI_FALLBACK:
             try:
+                # Usar sistema de fallback
+                api_key = GEMINI_FALLBACK.configure_genai()
                 import google.generativeai as genai
-                genai.configure(api_key=GOOGLE_API_KEY)
                 self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
-                logger.info("✅ Gemini Vision AI configurado para validação pós-entrada")
+                
+                # Testar conexão
+                success, msg = GEMINI_FALLBACK.test_connection()
+                if success:
+                    logger.info(f"✅ Gemini Vision AI configurado (com fallback): {msg}")
+                else:
+                    logger.warning(f"⚠️ Gemini com problemas: {msg}")
+                    
             except Exception as e:
-                logger.error(f"❌ Erro ao configurar Gemini: {e}")
-                self._alert_api_failure(f"Falha ao inicializar Gemini: {e}")
+                error_msg = str(e)
+                logger.error(f"❌ Erro ao configurar Gemini: {error_msg}")
+                
+                # Registrar falha no sistema de fallback
+                if HAS_FALLBACK:
+                    GEMINI_FALLBACK.record_failure(error_msg)
+                    
+                self._alert_api_failure(f"Falha ao inicializar Gemini: {error_msg}")
         else:
-            logger.warning("⚠️ GOOGLE_API_KEY ausente - Vision AI desabilitado")
-            self._alert_api_failure("GOOGLE_API_KEY não configurada - validação por IA desabilitada")
+            # Sistema antigo (sem fallback)
+            GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
+            if GOOGLE_API_KEY:
+                try:
+                    import google.generativeai as genai
+                    genai.configure(api_key=GOOGLE_API_KEY)
+                    self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
+                    logger.info("✅ Gemini Vision AI configurado (sistema antigo)")
+                except Exception as e:
+                    logger.error(f"❌ Erro ao configurar Gemini: {e}")
+                    self._alert_api_failure(f"Falha ao inicializar Gemini: {e}")
+            else:
+                logger.warning("⚠️ GOOGLE_API_KEY ausente - Vision AI desabilitado")
+                self._alert_api_failure("GOOGLE_API_KEY não configurada - validação por IA desabilitada")
 
     def _timeframe_to_seconds(self, tf: str) -> int:
         unit = tf[-1]
@@ -267,8 +302,9 @@ Responda ESTRITAMENTE neste formato JSON:
         """Envia alerta de falha da API via Telegram e log do painel"""
         alert_text = f"🚨 *ALERTA VISION AI*\n\n{message}\n\n⚠️ Posição protegida pelo SL na corretora."
 
-        # Telegram
+        # Telegram - REATIVADO (nova API key funcionando)
         send_telegram_alert(alert_text)
+        logger.info(f"Alertas Telegram reativados: {message[:100]}...")
 
         # Log do painel
         log_vision_alert(f"🚨 API FAILURE: {message}")
